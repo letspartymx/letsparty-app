@@ -18,15 +18,15 @@
       --sans: 'DM Sans', system-ui, sans-serif;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--fondo); color: var(--principal); font-family: var(--sans); font-size: 14px; font-weight: 300; min-height: 100vh; display: flex; }
+    body { background: var(--fondo); color: var(--principal); font-family: var(--sans); font-size: 14px; font-weight: 300; min-height: 100vh; display: flex; visibility: hidden; }
 
     /* Sidebar */
     .sidebar { width: 220px; min-height: 100vh; background: var(--principal); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; transition: transform 0.3s; }
     .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; position: relative; }
     .sidebar-logo img { height: 120px; width: auto; }
-    .btn-logout-mobile { display: none; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: rgba(251,248,241,0.8); align-items: center; justify-content: center; cursor: pointer; }
+    .btn-logout-mobile { display: none; position: absolute; right: 18px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: var(--fondo); border: none; color: var(--principal); align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
     .btn-logout-mobile svg { width: 16px; height: 16px; }
-    .btn-logout-mobile:hover { background: rgba(255,255,255,0.15); }
+    .btn-logout-mobile:hover { background: var(--acento); }
     .sidebar-nav { flex: 1; padding: 16px 0; list-style: none; }
     .sidebar-nav li a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; font-size: 13px; font-weight: 400; color: rgba(251,248,241,0.6); text-decoration: none; transition: color 0.2s, background 0.2s; }
     .sidebar-nav li a:hover { color: var(--fondo); background: rgba(255,255,255,0.06); }
@@ -153,6 +153,11 @@
     .total-wrap { display: flex; align-items: baseline; gap: 8px; }
     .total-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--acento); }
     .total-num { font-family: var(--serif); font-size: 26px; font-weight: 300; }
+    .fin-resumen { display: flex; flex-wrap: wrap; gap: 18px; margin: 14px 0; padding: 14px 0; border-top: 1px solid var(--detalle); border-bottom: 1px solid var(--detalle); }
+    .fin-item { display: flex; flex-direction: column; gap: 4px; }
+    .fin-item .total-num { font-size: 20px; }
+    .fin-ganancia { color: var(--exito); }
+    .fin-ganancia.neg { color: var(--error); }
     .btn-save { display: inline-flex; align-items: center; gap: 5px; background: var(--principal); color: var(--fondo); font-family: var(--sans); font-size: 12px; font-weight: 500; letter-spacing: 0.05em; padding: 0 18px; height: 32px; border: none; border-radius: 999px; cursor: pointer; transition: background 0.15s; }
     .btn-save:hover { background: var(--acento); }
     .btn-del-evento { width: 100%; background: transparent; color: var(--error); font-family: var(--sans); font-size: 12px; padding: 10px; border: 1px solid rgba(185,74,58,0.2); border-radius: 8px; cursor: pointer; margin-top: 6px; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
@@ -208,7 +213,7 @@
     /* Mobile */
     @media (max-width: 680px) {
       body { display: block; }
-      .sidebar { transform: translateX(-100%); }
+      .sidebar { width: 300px; transform: translateX(-100%); }
       .sidebar.abierto { transform: translateX(0); }
       .main-wrap { margin-left: 0; }
       .topbar-mobile { display: flex; }
@@ -354,7 +359,10 @@
     let eventos = [];
     let eventoActual = null;
 
-    onAuthStateChanged(auth, u => { if (!u) window.location.href = "index.html"; });
+    onAuthStateChanged(auth, u => {
+      if (!u) { window.location.href = "index.html"; return; }
+      document.body.style.visibility = "visible";
+    });
     async function cerrarSesion() { await signOut(auth); window.location.href = "index.html"; }
     document.getElementById("btn-logout").addEventListener("click", cerrarSesion);
     document.getElementById("btn-logout-mobile").addEventListener("click", cerrarSesion);
@@ -502,6 +510,14 @@
       });
       wrap.appendChild(cat1);
 
+      const precioAcordado = parseFloat(ev.precioAcordado) || 0;
+      const catFin = crearCategoria({
+        icono: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5a2.5 2.5 0 012.5-2.5h.5a2.5 2.5 0 010 5h-1a2.5 2.5 0 000 5h.5a2.5 2.5 0 002.5-2.5"/></svg>`,
+        nombre: "Finanzas", sub: precioAcordado > 0 ? `Precio $${precioAcordado.toLocaleString("es-MX")}` : "Sin precio acordado",
+        badge: null, contenido: buildFinanzas(ev, total)
+      });
+      wrap.appendChild(catFin);
+
       const cat2 = crearCategoria({
         icono: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/><path d="M9 12l2 2 4-4"/></svg>`,
         nombre: "Materiales", sub: mats.length > 0 ? `${listos} de ${mats.length} listos` : "Sin materiales",
@@ -542,6 +558,7 @@
       wrap.appendChild(btnDel);
 
       attachDatos(cat1, ev);
+      attachFinanzas(catFin, ev, total);
       attachMateriales(cat2, ev, mats);
       attachFotos(cat4, ev);
     }
@@ -591,6 +608,51 @@
           </div>
         </div>
         <div class="cat-footer" style="margin-top:14px"><div></div><button class="btn-save btn-save-datos">Guardar datos</button></div>`;
+    }
+
+    function buildFinanzas(ev, totalGastos) {
+      const precio = parseFloat(ev.precioAcordado) || 0;
+      const anticipo = parseFloat(ev.anticipoMonto) || 0;
+      const restante = precio - anticipo;
+      const ganancia = precio - totalGastos;
+      const fmt = n => "$" + n.toLocaleString("es-MX", { minimumFractionDigits: 2 });
+      return `
+        <div class="datos-grid">
+          <div class="dato-fila"><span class="dato-label">Precio</span><input class="dato-input f-precio" type="number" min="0" step="0.01" value="${ev.precioAcordado||""}" /></div>
+          <div class="dato-fila"><span class="dato-label">Anticipo</span><input class="dato-input f-anticipo" type="number" min="0" step="0.01" value="${ev.anticipoMonto||""}" /></div>
+        </div>
+        <div class="fin-resumen">
+          <div class="fin-item"><span class="total-label">Restante</span><span class="total-num fin-restante">${fmt(restante)}</span></div>
+          <div class="fin-item"><span class="total-label">Gastado</span><span class="total-num">${fmt(totalGastos)}</span></div>
+          <div class="fin-item"><span class="total-label">Ganancia</span><span class="total-num fin-ganancia${ganancia<0?" neg":""}">${fmt(ganancia)}</span></div>
+        </div>
+        <div class="cat-footer" style="margin-top:14px"><div></div><button class="btn-save btn-save-fin">Guardar</button></div>`;
+    }
+
+    function attachFinanzas(cat, ev, totalGastos) {
+      const cuerpo = cat.querySelector(".cat-cuerpo");
+      cuerpo.addEventListener("click", e => e.stopPropagation());
+      const inputPrecio = cuerpo.querySelector(".f-precio");
+      const inputAnticipo = cuerpo.querySelector(".f-anticipo");
+      const fmt = n => "$" + n.toLocaleString("es-MX", { minimumFractionDigits: 2 });
+      function recalcFin() {
+        const precio = parseFloat(inputPrecio.value) || 0;
+        const anticipo = parseFloat(inputAnticipo.value) || 0;
+        const ganancia = precio - totalGastos;
+        cuerpo.querySelector(".fin-restante").textContent = fmt(precio - anticipo);
+        const elGan = cuerpo.querySelector(".fin-ganancia");
+        elGan.textContent = fmt(ganancia);
+        elGan.classList.toggle("neg", ganancia < 0);
+      }
+      inputPrecio.addEventListener("input", recalcFin);
+      inputAnticipo.addEventListener("input", recalcFin);
+      cuerpo.querySelector(".btn-save-fin").addEventListener("click", async () => {
+        await updateDoc(doc(db, "eventos", ev.id), {
+          precioAcordado: parseFloat(inputPrecio.value) || 0,
+          anticipoMonto: parseFloat(inputAnticipo.value) || 0
+        });
+        toast("Finanzas guardadas");
+      });
     }
 
     function buildMateriales(ev, mats, total) {

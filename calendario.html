@@ -27,6 +27,7 @@
       font-weight: 300;
       min-height: 100vh;
       display: flex;
+      visibility: hidden;
     }
 
     /* ── Sidebar ── */
@@ -49,9 +50,9 @@
       position: relative;
     }
     .sidebar-logo img { height: 120px; width: auto; }
-    .btn-logout-mobile { display: none; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: rgba(251,248,241,0.8); align-items: center; justify-content: center; cursor: pointer; }
+    .btn-logout-mobile { display: none; position: absolute; right: 18px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: var(--fondo); border: none; color: var(--principal); align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
     .btn-logout-mobile svg { width: 16px; height: 16px; }
-    .btn-logout-mobile:hover { background: rgba(255,255,255,0.15); }
+    .btn-logout-mobile:hover { background: var(--acento); }
     .sidebar-nav { flex: 1; padding: 16px 0; list-style: none; }
     .sidebar-nav li a {
       display: flex; align-items: center; gap: 12px;
@@ -181,7 +182,7 @@
     }
 
     @media (max-width: 680px) {
-      .sidebar { transform: translateX(-100%); }
+      .sidebar { width: 300px; transform: translateX(-100%); }
       .sidebar.abierto { transform: translateX(0); }
       .main { margin-left: 0; padding: 16px; }
       .topbar-mobile { display: flex; }
@@ -268,7 +269,10 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    onAuthStateChanged(auth, u => { if (!u) window.location.href = "index.html"; });
+    onAuthStateChanged(auth, u => {
+      if (!u) { window.location.href = "index.html"; return; }
+      document.body.style.visibility = "visible";
+    });
     const cerrarSesion = () => signOut(auth);
     document.getElementById("btn-logout").onclick = cerrarSesion;
     document.getElementById("btn-logout-mobile").onclick = cerrarSesion;

@@ -16,6 +16,8 @@
       --detalle:   #EFE6DD;
       --acento:    #C2AFA0;
       --blanco:    #ffffff;
+      --exito:     #3a7d5a;
+      --error:     #b94a3a;
       --serif:     'Cormorant Garamond', Georgia, serif;
       --sans:      'DM Sans', system-ui, sans-serif;
       --sidebar:   220px;
@@ -29,6 +31,7 @@
       font-weight: 300;
       min-height: 100vh;
       display: flex;
+      visibility: hidden;
     }
 
     /* ── Sidebar ── */
@@ -57,21 +60,22 @@
     .btn-logout-mobile {
       display: none;
       position: absolute;
-      right: 14px;
+      right: 18px;
       top: 50%;
       transform: translateY(-50%);
       width: 34px;
       height: 34px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: rgba(251,248,241,0.8);
+      background: var(--fondo);
+      border: none;
+      color: var(--principal);
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: background 0.2s;
     }
     .btn-logout-mobile svg { width: 16px; height: 16px; }
-    .btn-logout-mobile:hover { background: rgba(255,255,255,0.15); }
+    .btn-logout-mobile:hover { background: var(--acento); }
     .sidebar-nav {
       flex: 1;
       padding: 16px 0;
@@ -199,6 +203,9 @@
       margin-bottom: 4px;
     }
     .resumen-sub { font-size: 12px; opacity: 0.5; }
+    .resumen-grid-2 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
+    .resumen-numero.pos { color: var(--exito); }
+    .resumen-numero.neg { color: var(--error); }
 
     /* ── Próximos eventos ── */
     .seccion-titulo {
@@ -262,13 +269,14 @@
     /* ── Mobile ── */
     @media (max-width: 680px) {
       body { display: block; }
-      .sidebar { transform: translateX(-100%); }
+      .sidebar { width: 300px; transform: translateX(-100%); }
       .sidebar.abierto { transform: translateX(0); }
       .main { margin-left: 0; padding: 20px 16px; }
       .topbar-mobile { display: flex; }
       .sidebar-footer { display: none; }
       .btn-logout-mobile { display: flex; }
       .resumen-grid { grid-template-columns: 1fr 1fr; }
+      .resumen-grid-2 { grid-template-columns: 1fr 1fr; }
       .proximo-card { grid-template-columns: 48px 1fr; }
       .proximo-orden { display: none; }
     }
@@ -334,6 +342,42 @@
       </div>
     </div>
 
+    <h2 class="seccion-titulo">Resumen <em>general</em></h2>
+    <div class="resumen-grid-2">
+      <div class="resumen-card">
+        <div class="resumen-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Cotizaciones
+        </div>
+        <div class="resumen-numero" id="total-cotizaciones">—</div>
+        <div class="resumen-sub">cotizaciones registradas</div>
+      </div>
+      <div class="resumen-card">
+        <div class="resumen-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          Fotos
+        </div>
+        <div class="resumen-numero" id="total-fotos">—</div>
+        <div class="resumen-sub">fotos en eventos</div>
+      </div>
+      <div class="resumen-card">
+        <div class="resumen-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5a2.5 2.5 0 012.5-2.5h.5a2.5 2.5 0 010 5h-1a2.5 2.5 0 000 5h.5a2.5 2.5 0 002.5-2.5"/></svg>
+          Por cobrar
+        </div>
+        <div class="resumen-numero" id="total-por-cobrar">—</div>
+        <div class="resumen-sub">restante por liquidar</div>
+      </div>
+      <div class="resumen-card">
+        <div class="resumen-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+          Ganancia
+        </div>
+        <div class="resumen-numero" id="total-ganancia">—</div>
+        <div class="resumen-sub">cobrado − gastado</div>
+      </div>
+    </div>
+
     <h2 class="seccion-titulo">Próximos <em>eventos</em></h2>
     <div class="proximos-lista" id="proximos-lista">
       <div class="empty-state">
@@ -366,7 +410,8 @@
     enableIndexedDbPersistence(db).catch(() => {});
 
     onAuthStateChanged(auth, (user) => {
-      if (!user) window.location.href = "index.html";
+      if (!user) { window.location.href = "index.html"; return; }
+      document.body.style.visibility = "visible";
     });
 
     async function cerrarSesion() {
@@ -393,10 +438,26 @@
       document.getElementById("eventos-mes").textContent =
         docs.filter(e => e.fecha && e.fecha.startsWith(mesActual)).length;
 
-      const totalGastos = docs.reduce((sum, e) =>
-        sum + (e.gastos || []).reduce((s, g) => s + (g.monto || 0), 0), 0);
+      const gastosEvento = e => (e.materiales || []).reduce((s, m) => s + (parseFloat(m.costo) || 0), 0);
+      const totalGastos = docs.reduce((sum, e) => sum + gastosEvento(e), 0);
       document.getElementById("total-gastos").textContent =
         totalGastos > 0 ? "$" + totalGastos.toLocaleString("es-MX") : "—";
+
+      const totalFotos = docs.reduce((sum, e) => sum + (e.fotos || []).length, 0);
+      document.getElementById("total-fotos").textContent = totalFotos;
+
+      const conPrecio = docs.filter(e => (parseFloat(e.precioAcordado) || 0) > 0);
+      const totalPorCobrar = conPrecio.reduce((sum, e) =>
+        sum + ((parseFloat(e.precioAcordado) || 0) - (parseFloat(e.anticipoMonto) || 0)), 0);
+      document.getElementById("total-por-cobrar").textContent =
+        totalPorCobrar !== 0 ? "$" + totalPorCobrar.toLocaleString("es-MX") : "—";
+
+      const totalGanancia = conPrecio.reduce((sum, e) =>
+        sum + ((parseFloat(e.precioAcordado) || 0) - gastosEvento(e)), 0);
+      const elGanancia = document.getElementById("total-ganancia");
+      elGanancia.textContent = conPrecio.length > 0 ? "$" + totalGanancia.toLocaleString("es-MX") : "—";
+      elGanancia.classList.toggle("pos", totalGanancia > 0);
+      elGanancia.classList.toggle("neg", totalGanancia < 0);
 
       const proximos = docs.filter(e => e.fecha >= ahora).slice(0, 5);
       const lista = document.getElementById("proximos-lista");
@@ -422,6 +483,10 @@
             <span class="proximo-orden">${e.orden}</span>
           </a>`;
       }).join("");
+    });
+
+    onSnapshot(collection(db, "cotizaciones"), (snapshot) => {
+      document.getElementById("total-cotizaciones").textContent = snapshot.size;
     });
   </script>
 

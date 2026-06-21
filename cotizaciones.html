@@ -18,15 +18,15 @@
       --sans: 'DM Sans', system-ui, sans-serif;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--fondo); color: var(--principal); font-family: var(--sans); font-size: 14px; font-weight: 300; min-height: 100vh; display: flex; }
+    body { background: var(--fondo); color: var(--principal); font-family: var(--sans); font-size: 14px; font-weight: 300; min-height: 100vh; display: flex; visibility: hidden; }
 
     /* Sidebar */
     .sidebar { width: 220px; min-height: 100vh; background: var(--principal); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; transition: transform 0.3s; }
     .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; position: relative; }
     .sidebar-logo img { height: 120px; width: auto; }
-    .btn-logout-mobile { display: none; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: rgba(251,248,241,0.8); align-items: center; justify-content: center; cursor: pointer; }
+    .btn-logout-mobile { display: none; position: absolute; right: 18px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: var(--fondo); border: none; color: var(--principal); align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
     .btn-logout-mobile svg { width: 16px; height: 16px; }
-    .btn-logout-mobile:hover { background: rgba(255,255,255,0.15); }
+    .btn-logout-mobile:hover { background: var(--acento); }
     .sidebar-nav { flex: 1; padding: 16px 0; list-style: none; }
     .sidebar-nav li a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; font-size: 13px; font-weight: 400; color: rgba(251,248,241,0.6); text-decoration: none; transition: color 0.2s, background 0.2s; }
     .sidebar-nav li a:hover { color: var(--fondo); background: rgba(255,255,255,0.06); }
@@ -141,7 +141,7 @@
     /* Mobile */
     @media (max-width: 680px) {
       body { display: block; }
-      .sidebar { transform: translateX(-100%); }
+      .sidebar { width: 300px; transform: translateX(-100%); }
       .sidebar.abierto { transform: translateX(0); }
       .main { margin-left: 0; padding: 16px 14px; }
       .topbar-mobile { display: flex; }
@@ -214,7 +214,7 @@
               <div class="form-field"><span class="form-label">Cliente</span><input class="form-input" id="f-cliente" type="text" /></div>
               <div class="form-field"><span class="form-label">Teléfono</span><input class="form-input" id="f-tel" type="tel" /></div>
               <div class="form-field"><span class="form-label">Fecha del evento</span><input class="form-input" id="f-fecha-ev" type="date" /></div>
-              <div class="form-field"><span class="form-label">Hora</span><input class="form-input" id="f-hora" type="time" /></div>
+              <div class="form-field"><span class="form-label">Hora</span><input class="form-input" id="f-hora" type="time" step="60" /></div>
               <div class="form-field full"><span class="form-label">Venue</span><input class="form-input" id="f-venue" type="text" /></div>
               <div class="form-field full"><span class="form-label">Descripción del servicio</span><input class="form-input" id="f-desc" type="text" placeholder="Ej. Decoración temática Frozen..." /></div>
             </div>
@@ -316,7 +316,10 @@ Una vez autorizado el diseño no hay cambios, ni es canjeable por otra decoraci�
     let cotizaciones = [];
     let cotActual = null;
 
-    onAuthStateChanged(auth, u => { if (!u) window.location.href = "index.html"; });
+    onAuthStateChanged(auth, u => {
+      if (!u) { window.location.href = "index.html"; return; }
+      document.body.style.visibility = "visible";
+    });
     async function cerrarSesion() { await signOut(auth); window.location.href = "index.html"; }
     document.getElementById("btn-logout").addEventListener("click", cerrarSesion);
     document.getElementById("btn-logout-mobile").addEventListener("click", cerrarSesion);
@@ -622,6 +625,9 @@ Una vez autorizado el diseño no hay cambios, ni es canjeable por otra decoraci�
       if (!cot) return;
       if (!confirm(`¿Convertir la cotización de ${cot.cliente || "este cliente"} en un evento?`)) return;
       const servicios = getServicios();
+      const subtotal = servicios.reduce((s, r) => s + r.cantidad * r.precio, 0);
+      const pct = parseFloat(document.getElementById("anticipo-pct").value) || 50;
+      const anticipoMonto = subtotal * pct / 100;
       await addDoc(collection(db, "eventos"), {
         orden:      cot.orden || "",
         cliente:    cot.cliente || "",
@@ -631,6 +637,8 @@ Una vez autorizado el diseño no hay cambios, ni es canjeable por otra decoraci�
         venue:      cot.venue || "",
         direccion:  "",
         materiales: servicios.map(s => ({ nombre: s.nombre, costo: s.cantidad * s.precio, listo: false })),
+        precioAcordado: subtotal,
+        anticipoMonto,
         creadoEn:   Timestamp.now()
       });
       toast("¡Evento creado desde la cotización!");
