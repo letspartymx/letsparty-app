@@ -2,7 +2,7 @@
   "name": "Let's Party Admin",
   "short_name": "Let's Party",
   "description": "Panel de administración Let's Party",
-  "start_url": "/index.html",
+  "start_url": "/letsparty-app/index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#FBF8F1",

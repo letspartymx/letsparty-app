@@ -1,8 +1,9 @@
-const CACHE = "letsparty-v1";
+const CACHE = "letsparty-v2";
 const ARCHIVOS = [
-  "/index.html",
-  "/dashboard.html",
-  "/eventos.html"
+  "/letsparty-app/index.html",
+  "/letsparty-app/dashboard.html",
+  "/letsparty-app/eventos.html",
+  "/letsparty-app/styles.css"
 ];
 
 self.addEventListener("install", (e) => {
