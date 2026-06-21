@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#55524F" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Fotos · Let's Party</title>
+  <link rel="icon" href="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root {
+      --fondo: #FBF8F1; --principal: #55524F;
+      --detalle: #EFE6DD; --acento: #C2AFA0;
+      --blanco: #ffffff; --error: #b94a3a; --exito: #3a7d5a;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --sans: 'DM Sans', system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--fondo); color: var(--principal); font-family: var(--sans); font-size: 14px; font-weight: 300; min-height: 100vh; display: flex; }
+
+    /* Sidebar */
+    .sidebar { width: 220px; min-height: 100vh; background: var(--principal); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; transition: transform 0.3s; }
+    .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; }
+    .sidebar-logo img { height: 120px; width: auto; }
+    .sidebar-nav { flex: 1; padding: 16px 0; list-style: none; }
+    .sidebar-nav li a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; font-size: 13px; font-weight: 400; color: rgba(251,248,241,0.6); text-decoration: none; transition: color 0.2s, background 0.2s; }
+    .sidebar-nav li a:hover { color: var(--fondo); background: rgba(255,255,255,0.06); }
+    .sidebar-nav li a.activo { color: var(--fondo); background: rgba(255,255,255,0.12); }
+    .sidebar-nav li a svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .btn-logout { width: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(251,248,241,0.6); font-family: var(--sans); font-size: 12px; padding: 10px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+    .btn-logout:hover { background: rgba(255,255,255,0.08); color: var(--fondo); }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(85,82,79,0.45); z-index: 99; }
+    .sidebar-overlay.visible { display: block; }
+
+    /* Main */
+    .main-wrap { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+
+    /* Topbar mobile */
+    .topbar-mobile { display: none; align-items: center; justify-content: space-between; margin-bottom: 16px; position: relative; padding: 8px 16px 0; min-height: 96px; }
+    .topbar-mobile img { height: 80px; width: auto; position: absolute; left: 50%; transform: translateX(-50%); }
+    .btn-hamburguesa { background: var(--principal); border: none; border-radius: 10px; padding: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .btn-hamburguesa svg { width: 20px; height: 20px; }
+
+    /* Layout dos columnas */
+    .fotos-layout { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 0px); }
+
+    /* Columna izquierda — lista eventos */
+    .col-lista { width: 300px; flex-shrink: 0; border-right: 1px solid var(--detalle); display: flex; flex-direction: column; background: var(--blanco); overflow: hidden; }
+    .col-lista-header { padding: 20px 16px 12px; border-bottom: 1px solid var(--detalle); flex-shrink: 0; }
+    .col-lista-titulo { font-family: var(--serif); font-size: 22px; font-weight: 300; }
+    .col-lista-titulo em { font-style: italic; color: var(--acento); }
+    .lista-eventos { flex: 1; overflow-y: auto; padding: 8px; }
+    .ev-item { padding: 12px 14px; border-radius: 10px; cursor: pointer; transition: background 0.15s; border: 1px solid transparent; margin-bottom: 4px; }
+    .ev-item:hover { background: var(--fondo); }
+    .ev-item.activo { background: var(--fondo); border-color: var(--acento); }
+    .ev-item-nombre { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+    .ev-item-meta { font-size: 11px; opacity: 0.5; display: flex; gap: 6px; }
+    .ev-item-orden { font-size: 10px; font-weight: 500; color: var(--acento); background: var(--detalle); padding: 2px 7px; border-radius: 999px; margin-left: auto; flex-shrink: 0; }
+    .ev-item-fotos { font-size: 10px; opacity: 0.5; margin-left: auto; flex-shrink: 0; }
+    .lista-vacia { text-align: center; padding: 40px 20px; }
+    .lista-vacia p { font-family: var(--serif); font-size: 18px; font-style: italic; color: var(--acento); margin-bottom: 4px; }
+    .lista-vacia span { font-size: 12px; opacity: 0.45; }
+
+    /* Columna derecha — galería */
+    .col-detalle { flex: 1; overflow-y: auto; padding: 28px 32px; }
+    .sin-evento { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; opacity: 0.5; }
+    .sin-evento p { font-family: var(--serif); font-size: 22px; font-style: italic; color: var(--acento); margin-bottom: 6px; }
+    .sin-evento span { font-size: 13px; }
+    .detalle-header { margin-bottom: 20px; }
+    .detalle-titulo { font-family: var(--serif); font-size: 28px; font-weight: 300; }
+    .detalle-titulo em { font-style: italic; color: var(--acento); }
+    .detalle-meta { font-size: 12px; opacity: 0.5; margin-top: 4px; }
+
+    /* Galería */
+    .fotos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .foto-item { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: var(--detalle); }
+    .foto-item img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }
+    .btn-foto-del { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; background: rgba(0,0,0,0.55); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .btn-foto-del svg { width: 12px; height: 12px; }
+    .sin-fotos { text-align: center; padding: 60px 20px; opacity: 0.5; }
+    .sin-fotos p { font-family: var(--serif); font-size: 18px; font-style: italic; color: var(--acento); margin-bottom: 4px; }
+    .sin-fotos span { font-size: 12px; }
+
+    /* Lightbox */
+    .lightbox { display: none; position: fixed; inset: 0; background: rgba(20,18,16,0.9); z-index: 500; align-items: center; justify-content: center; padding: 24px; }
+    .lightbox.visible { display: flex; }
+    .lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; }
+    .lightbox-cerrar { position: absolute; top: 18px; right: 22px; background: none; border: none; color: #fff; cursor: pointer; }
+    .lightbox-cerrar svg { width: 22px; height: 22px; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 16px; right: 16px; background: var(--principal); color: var(--fondo); font-size: 12px; padding: 9px 14px; border-radius: 8px; z-index: 400; transform: translateY(50px); opacity: 0; transition: all 0.25s; }
+    .toast.visible { transform: translateY(0); opacity: 1; }
+
+    /* Selector mobile */
+    .selector-bar { display: none; background: var(--blanco); border-bottom: 1px solid var(--detalle); padding: 10px 16px; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 99; }
+    .btn-selector { flex: 1; display: flex; align-items: center; justify-content: space-between; background: var(--fondo); border: 1.5px solid var(--detalle); border-radius: 8px; padding: 10px 14px; cursor: pointer; transition: border-color 0.2s; gap: 10px; }
+    .btn-selector:hover { border-color: var(--acento); }
+    .selector-texto { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .selector-texto svg { width: 16px; height: 16px; color: var(--acento); flex-shrink: 0; }
+    .selector-nombre { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .selector-sub { font-size: 11px; opacity: 0.5; white-space: nowrap; }
+    .selector-chevron svg { width: 14px; height: 14px; color: var(--acento); transition: transform 0.2s; }
+    .selector-chevron.abierto svg { transform: rotate(180deg); }
+    .dropdown-mobile { display: none; position: absolute; top: calc(64px + 58px); left: 16px; right: 16px; background: var(--blanco); border: 1.5px solid var(--detalle); border-radius: 10px; box-shadow: 0 8px 24px rgba(85,82,79,0.12); z-index: 200; max-height: 280px; overflow-y: auto; }
+    .dropdown-mobile.visible { display: block; }
+    .di-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--detalle); transition: background 0.15s; }
+    .di-item:last-child { border-bottom: none; }
+    .di-item:hover { background: var(--fondo); }
+    .di-item.activo { background: var(--detalle); }
+    .di-nombre { font-size: 14px; font-weight: 500; }
+    .di-meta { font-size: 11px; opacity: 0.5; margin-top: 2px; }
+
+    /* Mobile */
+    @media (max-width: 680px) {
+      body { display: block; }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.abierto { transform: translateX(0); }
+      .main-wrap { margin-left: 0; }
+      .topbar-mobile { display: flex; }
+      .selector-bar { display: flex; }
+      .fotos-layout { flex-direction: column; height: auto; overflow: visible; }
+      .col-lista { display: none; }
+      .col-detalle { padding: 16px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" alt="Let's Party" />
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a></li>
+      <li><a href="eventos.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Eventos</a></li>
+      <li><a href="calendario.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="8" cy="16" r="1" fill="currentColor"/><circle cx="12" cy="16" r="1" fill="currentColor"/><circle cx="16" cy="16" r="1" fill="currentColor"/></svg>Calendario</a></li>
+      <li><a href="fotos.html" class="activo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Fotos</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="main-wrap">
+    <!-- Topbar mobile -->
+    <div class="topbar-mobile">
+      <button class="btn-hamburguesa" id="btn-hamburguesa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#FBF8F1" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <img src="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" alt="Let's Party" />
+    </div>
+
+    <!-- Selector bar mobile -->
+    <div class="selector-bar">
+      <div class="btn-selector" id="btn-selector">
+        <div class="selector-texto">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <div>
+            <div class="selector-nombre" id="selector-nombre">Selecciona un evento</div>
+            <div class="selector-sub" id="selector-sub">—</div>
+          </div>
+        </div>
+        <span class="selector-chevron" id="selector-chevron">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </span>
+      </div>
+    </div>
+    <div class="dropdown-mobile" id="dropdown-mobile"></div>
+
+    <!-- Layout dos columnas -->
+    <div class="fotos-layout">
+
+      <!-- Columna izquierda: lista de eventos -->
+      <div class="col-lista">
+        <div class="col-lista-header">
+          <div class="col-lista-titulo">Fo<em>tos</em></div>
+        </div>
+        <div class="lista-eventos" id="lista-eventos">
+          <div class="lista-vacia"><p>Sin eventos</p><span>Crea eventos en el módulo Eventos</span></div>
+        </div>
+      </div>
+
+      <!-- Columna derecha: galería -->
+      <div class="col-detalle" id="col-detalle">
+        <div class="sin-evento" id="sin-evento">
+          <p>Selecciona un evento</p>
+          <span>Elige un evento de la lista para ver sus fotos</span>
+        </div>
+        <div id="galeria" style="display:none">
+          <div class="detalle-header">
+            <div class="detalle-titulo" id="gal-titulo"></div>
+            <div class="detalle-meta" id="gal-meta"></div>
+          </div>
+          <div id="gal-grid"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-cerrar" id="lightbox-cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    <img id="lightbox-img" src="" alt="" />
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { initializeFirestore, persistentLocalCache, collection, updateDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const cfg = {
+      apiKey: "AIzaSyB6nm7Ttl2Iuevbp6gp-GsBk4-06I6Z5Bc",
+      authDomain: "letsparty-db.firebaseapp.com",
+      projectId: "letsparty-db",
+      storageBucket: "letsparty-db.firebasestorage.app",
+      messagingSenderId: "274690779810",
+      appId: "1:274690779810:web:ce6f54b3ce8b39248505fb"
+    };
+
+    const CLOUDINARY_DELETE_WORKER_URL = "https://letsparty-cloudinary-delete.letspartymxapp.workers.dev";
+    const CLOUDINARY_DELETE_TOKEN = "fc18de07190b8f9ea92712319950afbe3e2c3dc0b4982da7";
+
+    const app  = initializeApp(cfg);
+    const auth = getAuth(app);
+    const db   = initializeFirestore(app, { localCache: persistentLocalCache() });
+    const MES  = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+
+    let eventos = [];
+    let eventoActual = null;
+
+    onAuthStateChanged(auth, u => { if (!u) window.location.href = "index.html"; });
+    document.getElementById("btn-logout").addEventListener("click", async () => {
+      await signOut(auth); window.location.href = "index.html";
+    });
+
+    // Hamburguesa
+    const sidebarEl = document.getElementById("sidebar");
+    const sidebarOv = document.getElementById("sidebar-overlay");
+    document.getElementById("btn-hamburguesa").addEventListener("click", () => {
+      sidebarEl.classList.add("abierto"); sidebarOv.classList.add("visible");
+    });
+    sidebarOv.addEventListener("click", () => {
+      sidebarEl.classList.remove("abierto"); sidebarOv.classList.remove("visible");
+    });
+
+    // Dropdown mobile
+    const dropdown = document.getElementById("dropdown-mobile");
+    const btnSel    = document.getElementById("btn-selector");
+    const chevron   = document.getElementById("selector-chevron");
+    btnSel.addEventListener("click", () => {
+      const open = dropdown.classList.toggle("visible");
+      chevron.classList.toggle("abierto", open);
+    });
+    document.addEventListener("click", e => {
+      if (!btnSel.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.remove("visible");
+        chevron.classList.remove("abierto");
+      }
+    });
+
+    // Lightbox
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightbox-img");
+    document.getElementById("lightbox-cerrar").addEventListener("click", () => lightbox.classList.remove("visible"));
+    lightbox.addEventListener("click", e => { if (e.target === lightbox) lightbox.classList.remove("visible"); });
+
+    onSnapshot(query(collection(db, "eventos"), orderBy("fecha", "desc")), snap => {
+      eventos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderLista();
+      if (eventoActual) {
+        const ev = eventos.find(e => e.id === eventoActual);
+        if (ev) renderGaleria(ev);
+      }
+    });
+
+    function renderLista() {
+      const contenedor = document.getElementById("lista-eventos");
+      if (eventos.length === 0) {
+        contenedor.innerHTML = `<div class="lista-vacia"><p>Sin eventos</p><span>Crea eventos en el módulo Eventos</span></div>`;
+        dropdown.innerHTML = `<div style="padding:20px;text-align:center;font-size:13px;opacity:0.5">Sin eventos</div>`;
+        return;
+      }
+      contenedor.innerHTML = eventos.map(ev => {
+        const [año, mes, dia] = (ev.fecha||"").split("-");
+        const fechaStr = mes ? `${dia} ${MES[parseInt(mes)-1]} ${año}` : "—";
+        const nFotos = (ev.fotos||[]).length;
+        return `
+          <div class="ev-item${ev.id === eventoActual ? " activo" : ""}" data-id="${ev.id}">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="flex:1;min-width:0">
+                <div class="ev-item-nombre">${ev.cliente || "—"}</div>
+                <div class="ev-item-meta"><span>${fechaStr}</span></div>
+              </div>
+              <span class="ev-item-fotos">${nFotos} foto${nFotos===1?"":"s"}</span>
+            </div>
+          </div>`;
+      }).join("");
+
+      contenedor.querySelectorAll(".ev-item").forEach(item => {
+        item.addEventListener("click", () => seleccionarEvento(item.dataset.id));
+      });
+
+      dropdown.innerHTML = eventos.map(ev => {
+        const [año, mes, dia] = (ev.fecha||"").split("-");
+        const fechaStr = mes ? `${dia} ${MES[parseInt(mes)-1]} ${año}` : "—";
+        return `
+          <div class="di-item${ev.id === eventoActual ? " activo" : ""}" data-id="${ev.id}">
+            <div>
+              <div class="di-nombre">${ev.cliente||"—"}</div>
+              <div class="di-meta">${fechaStr} · ${(ev.fotos||[]).length} fotos</div>
+            </div>
+          </div>`;
+      }).join("");
+
+      dropdown.querySelectorAll(".di-item").forEach(item => {
+        item.addEventListener("click", () => {
+          seleccionarEvento(item.dataset.id);
+          dropdown.classList.remove("visible");
+          chevron.classList.remove("abierto");
+        });
+      });
+    }
+
+    function seleccionarEvento(id) {
+      eventoActual = id;
+      const ev = eventos.find(e => e.id === id);
+      if (!ev) return;
+      const [año, mes, dia] = (ev.fecha||"").split("-");
+      document.getElementById("selector-nombre").textContent = ev.cliente || "—";
+      document.getElementById("selector-sub").textContent = `${dia||"—"} ${mes ? MES[parseInt(mes)-1] : ""} ${año||""}`;
+      renderLista();
+      renderGaleria(ev);
+    }
+
+    function renderGaleria(ev) {
+      document.getElementById("sin-evento").style.display = "none";
+      document.getElementById("galeria").style.display = "block";
+      const [año, mes, dia] = (ev.fecha||"").split("-");
+      const fechaStr = mes ? `${dia} ${MES[parseInt(mes)-1]} ${año}` : "—";
+      document.getElementById("gal-titulo").innerHTML = `${ev.cliente || "—"}`;
+      document.getElementById("gal-meta").textContent = `${fechaStr}${ev.venue ? " · " + ev.venue : ""}`;
+
+      const grid = document.getElementById("gal-grid");
+      const fotos = ev.fotos || [];
+      if (fotos.length === 0) {
+        grid.innerHTML = `<div class="sin-fotos"><p>Sin fotos</p><span>Sube fotos a este evento desde el módulo Eventos</span></div>`;
+        return;
+      }
+      grid.innerHTML = `<div class="fotos-grid">${fotos.map((f, i) => fotoItem(f, i)).join("")}</div>`;
+
+      grid.querySelectorAll(".foto-item img").forEach(img => {
+        img.addEventListener("click", () => {
+          lightboxImg.src = img.dataset.full;
+          lightbox.classList.add("visible");
+        });
+      });
+
+      grid.querySelectorAll(".btn-foto-del").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          if (!confirm("¿Eliminar esta foto de Cloudinary? Esta acción no se puede deshacer.")) return;
+          const i = parseInt(btn.closest(".foto-item").dataset.i, 10);
+          const foto = fotos[i];
+          if (!foto) return;
+          try {
+            await fetch(CLOUDINARY_DELETE_WORKER_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Authorization": `Bearer ${CLOUDINARY_DELETE_TOKEN}` },
+              body: JSON.stringify({ publicId: foto.publicId })
+            });
+          } catch (e) {}
+          const nuevasFotos = fotos.filter((_, idx) => idx !== i);
+          await updateDoc(doc(db, "eventos", ev.id), { fotos: nuevasFotos });
+          toast("Foto eliminada");
+        });
+      });
+    }
+
+    function fotoItem(f, i) {
+      const thumb = f.url.replace("/upload/", "/upload/w_400,h_400,c_fill,f_auto,q_auto/");
+      return `<div class="foto-item" data-i="${i}">
+        <img src="${thumb}" data-full="${f.url}" loading="lazy" />
+        <button class="btn-foto-del" type="button" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>`;
+    }
+
+    function toast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg; t.classList.add("visible");
+      setTimeout(() => t.classList.remove("visible"), 2500);
+    }
+  </script>
+</body>
+</html>
