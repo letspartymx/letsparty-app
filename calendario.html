@@ -46,8 +46,12 @@
       border-bottom: 1px solid rgba(255,255,255,0.1);
       display: flex;
       justify-content: center;
+      position: relative;
     }
     .sidebar-logo img { height: 120px; width: auto; }
+    .btn-logout-mobile { display: none; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: rgba(251,248,241,0.8); align-items: center; justify-content: center; cursor: pointer; }
+    .btn-logout-mobile svg { width: 16px; height: 16px; }
+    .btn-logout-mobile:hover { background: rgba(255,255,255,0.15); }
     .sidebar-nav { flex: 1; padding: 16px 0; list-style: none; }
     .sidebar-nav li a {
       display: flex; align-items: center; gap: 12px;
@@ -60,13 +64,14 @@
     .sidebar-nav li a svg { width: 16px; height: 16px; flex-shrink: 0; }
     .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
     .btn-logout {
-      width: 100%; background: transparent;
-      border: 1px solid rgba(255,255,255,0.2);
-      color: rgba(251,248,241,0.6); font-family: var(--sans);
-      font-size: 12px; padding: 10px; border-radius: 8px;
-      cursor: pointer; transition: all 0.2s;
+      width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: var(--fondo); color: var(--principal);
+      border: none; font-family: var(--sans);
+      font-size: 12px; font-weight: 500; padding: 10px; border-radius: 8px;
+      cursor: pointer; transition: background 0.2s;
     }
-    .btn-logout:hover { background: rgba(255,255,255,0.08); color: var(--fondo); }
+    .btn-logout svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .btn-logout:hover { background: var(--acento); }
 
     .sidebar-overlay {
       display: none; position: fixed; inset: 0;
@@ -180,6 +185,8 @@
       .sidebar.abierto { transform: translateX(0); }
       .main { margin-left: 0; padding: 16px; }
       .topbar-mobile { display: flex; }
+      .sidebar-footer { display: none; }
+      .btn-logout-mobile { display: flex; }
       .cal-grid-wrap { display: none; }
       .vista-lista { display: block; }
       .cal-titulo { font-size: 24px; }
@@ -192,10 +199,13 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <img src="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" alt="Let's Party" />
+      <button class="btn-logout-mobile" id="btn-logout-mobile" title="Cerrar sesión">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
     </div>
     <ul class="sidebar-nav"></ul>
     <div class="sidebar-footer">
-      <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
+      <button class="btn-logout" id="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Cerrar sesión</button>
     </div>
   </aside>
 
@@ -259,7 +269,9 @@
     const db = getFirestore(app);
 
     onAuthStateChanged(auth, u => { if (!u) window.location.href = "index.html"; });
-    document.getElementById("btn-logout").onclick = () => signOut(auth);
+    const cerrarSesion = () => signOut(auth);
+    document.getElementById("btn-logout").onclick = cerrarSesion;
+    document.getElementById("btn-logout-mobile").onclick = cerrarSesion;
 
     // --- CALENDARIO LOGIC ---
     let eventos = [];
