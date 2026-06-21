@@ -4,471 +4,175 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#55524F" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <title>Eventos · Let's Party</title>
   <link rel="icon" href="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" />
   <link rel="stylesheet" href="styles.css" />
   <style>
     :root {
-      --fondo:     #FBF8F1;
-      --principal: #55524F;
-      --detalle:   #EFE6DD;
-      --acento:    #C2AFA0;
-      --blanco:    #ffffff;
-      --error:     #b94a3a;
-      --exito:     #3a7d5a;
-      --serif:     'Cormorant Garamond', Georgia, serif;
-      --sans:      'DM Sans', system-ui, sans-serif;
+      --fondo: #FBF8F1; --principal: #55524F;
+      --detalle: #EFE6DD; --acento: #C2AFA0;
+      --blanco: #ffffff; --error: #b94a3a; --exito: #3a7d5a;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --sans: 'DM Sans', system-ui, sans-serif;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--fondo);
-      color: var(--principal);
-      font-family: var(--sans);
-      font-size: 14px;
-      font-weight: 300;
-      min-height: 100vh;
-      display: flex;
-    }
+    body { background: var(--fondo); color: var(--principal); font-family: var(--sans); font-size: 14px; font-weight: 300; min-height: 100vh; display: flex; }
 
-    /* ── Sidebar ── */
-    .sidebar {
-      width: 220px; min-height: 100vh;
-      background: var(--principal);
-      display: flex; flex-direction: column;
-      position: fixed; top: 0; left: 0;
-      z-index: 100; transition: transform 0.3s;
-    }
-    .sidebar-logo {
-      padding: 24px 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      display: flex; justify-content: center;
-    }
+    /* Sidebar */
+    .sidebar { width: 220px; min-height: 100vh; background: var(--principal); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; transition: transform 0.3s; }
+    .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; }
     .sidebar-logo img { height: 120px; width: auto; }
     .sidebar-nav { flex: 1; padding: 16px 0; list-style: none; }
-    .sidebar-nav li a {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 20px; font-size: 13px; font-weight: 400;
-      color: rgba(251,248,241,0.6); letter-spacing: 0.04em;
-      text-decoration: none; transition: color 0.2s, background 0.2s;
-    }
+    .sidebar-nav li a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; font-size: 13px; font-weight: 400; color: rgba(251,248,241,0.6); text-decoration: none; transition: color 0.2s, background 0.2s; }
     .sidebar-nav li a:hover { color: var(--fondo); background: rgba(255,255,255,0.06); }
     .sidebar-nav li a.activo { color: var(--fondo); background: rgba(255,255,255,0.12); }
     .sidebar-nav li a svg { width: 16px; height: 16px; flex-shrink: 0; }
     .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
-    .btn-logout {
-      width: 100%; background: transparent;
-      border: 1px solid rgba(255,255,255,0.2);
-      color: rgba(251,248,241,0.6); font-family: var(--sans);
-      font-size: 12px; padding: 10px; border-radius: 8px;
-      cursor: pointer; transition: all 0.2s;
-    }
+    .btn-logout { width: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(251,248,241,0.6); font-family: var(--sans); font-size: 12px; padding: 10px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
     .btn-logout:hover { background: rgba(255,255,255,0.08); color: var(--fondo); }
-    .sidebar-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(85,82,79,0.45); z-index: 99;
-    }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(85,82,79,0.45); z-index: 99; }
     .sidebar-overlay.visible { display: block; }
 
-    /* ── Main ── */
-    .main-wrap { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
+    /* Main */
+    .main-wrap { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
 
-    /* ── Topbar mobile ── */
-    .topbar-mobile {
-      display: none; align-items: center; justify-content: space-between;
-      background: var(--principal); padding: 0 16px; height: 64px;
-      border-bottom: 2px solid var(--acento); flex-shrink: 0;
-    }
+    /* Topbar mobile */
+    .topbar-mobile { display: none; align-items: center; justify-content: space-between; background: var(--principal); padding: 0 16px; height: 64px; border-bottom: 2px solid var(--acento); flex-shrink: 0; }
     .topbar-mobile img { height: 44px; width: auto; }
-    .btn-hamburguesa {
-      background: transparent; border: none; border-radius: 8px;
-      padding: 8px; cursor: pointer; display: flex; align-items: center;
-    }
-    .btn-hamburguesa svg { width: 20px; height: 20px; }
+    .btn-hamburguesa { background: transparent; border: none; padding: 8px; cursor: pointer; display: flex; align-items: center; }
+    .btn-hamburguesa svg { width: 22px; height: 22px; }
 
-    /* ── Selector evento ── */
-    .selector-bar {
-      background: var(--blanco);
-      border-bottom: 1px solid var(--detalle);
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      position: sticky;
-      top: 0;
-      z-index: 99;
-    }
-    .btn-selector {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--fondo);
-      border: 1.5px solid var(--detalle);
-      border-radius: 8px;
-      padding: 10px 14px;
-      cursor: pointer;
-      transition: border-color 0.2s;
-      gap: 10px;
-    }
-    .btn-selector:hover { border-color: var(--acento); }
-    .btn-selector.activo { border-color: var(--acento); }
-    .selector-texto {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-    .selector-texto svg { width: 16px; height: 16px; color: var(--acento); flex-shrink: 0; }
-    .selector-nombre {
-      font-size: 14px;
-      font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .selector-sub { font-size: 11px; opacity: 0.5; white-space: nowrap; }
-    .selector-chevron svg { width: 14px; height: 14px; color: var(--acento); transition: transform 0.2s; }
-    .selector-chevron.abierto svg { transform: rotate(180deg); }
+    /* ── Layout dos columnas desktop ── */
+    .eventos-layout { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 0px); }
 
-    .btn-nuevo-ev {
-      display: inline-flex; align-items: center; justify-content: center;
-      background: var(--acento); color: var(--principal);
-      border: none; border-radius: 8px;
-      width: 38px; height: 38px;
-      cursor: pointer; flex-shrink: 0;
-      transition: background 0.15s;
-    }
-    .btn-nuevo-ev:hover { background: var(--detalle); }
-    .btn-nuevo-ev svg { width: 16px; height: 16px; }
+    /* Columna izquierda — lista eventos */
+    .col-lista { width: 300px; flex-shrink: 0; border-right: 1px solid var(--detalle); display: flex; flex-direction: column; background: var(--blanco); overflow: hidden; }
+    .col-lista-header { padding: 20px 16px 12px; border-bottom: 1px solid var(--detalle); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .col-lista-titulo { font-family: var(--serif); font-size: 22px; font-weight: 300; }
+    .col-lista-titulo em { font-style: italic; color: var(--acento); }
+    .btn-nuevo { display: inline-flex; align-items: center; justify-content: center; background: var(--acento); color: var(--principal); border: none; border-radius: 8px; width: 32px; height: 32px; cursor: pointer; flex-shrink: 0; transition: background 0.15s; }
+    .btn-nuevo:hover { background: var(--detalle); }
+    .btn-nuevo svg { width: 16px; height: 16px; }
+    .lista-eventos { flex: 1; overflow-y: auto; padding: 8px; }
+    .ev-item { padding: 12px 14px; border-radius: 10px; cursor: pointer; transition: background 0.15s; border: 1px solid transparent; margin-bottom: 4px; }
+    .ev-item:hover { background: var(--fondo); }
+    .ev-item.activo { background: var(--fondo); border-color: var(--acento); }
+    .ev-item-nombre { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+    .ev-item-meta { font-size: 11px; opacity: 0.5; display: flex; gap: 6px; }
+    .ev-item-orden { font-size: 10px; font-weight: 500; color: var(--acento); background: var(--detalle); padding: 2px 7px; border-radius: 999px; margin-left: auto; flex-shrink: 0; }
+    .lista-vacia { text-align: center; padding: 40px 20px; }
+    .lista-vacia p { font-family: var(--serif); font-size: 18px; font-style: italic; color: var(--acento); margin-bottom: 4px; }
+    .lista-vacia span { font-size: 12px; opacity: 0.45; }
 
-    /* ── Dropdown selector ── */
-    .dropdown {
-      display: none;
-      position: absolute;
-      top: calc(58px);
-      left: 16px;
-      right: 16px;
-      background: var(--blanco);
-      border: 1.5px solid var(--detalle);
-      border-radius: 10px;
-      box-shadow: 0 8px 24px rgba(85,82,79,0.12);
-      z-index: 200;
-      max-height: 280px;
-      overflow-y: auto;
-    }
-    .dropdown.visible { display: block; }
-    .dropdown-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      cursor: pointer;
-      border-bottom: 1px solid var(--detalle);
-      transition: background 0.15s;
-    }
-    .dropdown-item:last-child { border-bottom: none; }
-    .dropdown-item:hover { background: var(--fondo); }
-    .dropdown-item.activo { background: var(--detalle); }
-    .di-nombre { font-size: 14px; font-weight: 500; }
-    .di-meta { font-size: 11px; opacity: 0.5; margin-top: 2px; }
-    .di-orden {
-      font-size: 10px; font-weight: 500;
-      color: var(--acento); background: var(--detalle);
-      padding: 3px 8px; border-radius: 999px;
-    }
-    .dropdown-empty {
-      padding: 24px 16px;
-      text-align: center;
-      font-size: 13px;
-      opacity: 0.5;
-    }
+    /* Columna derecha — detalle */
+    .col-detalle { flex: 1; overflow-y: auto; padding: 28px 32px; }
+    .sin-evento { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; opacity: 0.5; }
+    .sin-evento p { font-family: var(--serif); font-size: 22px; font-style: italic; color: var(--acento); margin-bottom: 6px; }
+    .sin-evento span { font-size: 13px; }
 
-    /* ── Body principal ── */
-    .body-wrap {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 16px 14px;
-    }
-
-    /* Estado vacío */
-    .sin-evento {
-      text-align: center;
-      padding: 60px 20px;
-    }
-    .sin-evento p { font-family: var(--serif); font-size: 20px; font-style: italic; color: var(--acento); margin-bottom: 8px; }
-    .sin-evento span { font-size: 13px; opacity: 0.45; }
-
-    /* ── Categorías ── */
-    .categoria {
-      background: var(--blanco);
-      border: 1px solid var(--detalle);
-      border-radius: 12px;
-      margin-bottom: 10px;
-      overflow: hidden;
-      transition: border-color 0.15s;
-    }
+    /* Categorías */
+    .detalle-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 12px; }
+    .detalle-titulo { font-family: var(--serif); font-size: 28px; font-weight: 300; }
+    .detalle-titulo em { font-style: italic; color: var(--acento); }
+    .detalle-meta { font-size: 12px; opacity: 0.5; margin-top: 4px; }
+    .categoria { background: var(--blanco); border: 1px solid var(--detalle); border-radius: 12px; margin-bottom: 10px; overflow: hidden; transition: border-color 0.15s; }
     .categoria.abierta { border-color: var(--acento); }
-
-    .cat-cabecera {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 16px;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
+    .cat-cabecera { display: flex; align-items: center; gap: 14px; padding: 16px; cursor: pointer; transition: background 0.15s; }
     .cat-cabecera:hover { background: #faf7f2; }
     .categoria.abierta .cat-cabecera { background: #f5f1ea; }
-
-    .cat-icono {
-      width: 36px; height: 36px;
-      background: var(--detalle);
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      color: var(--principal);
-    }
+    .cat-icono { width: 36px; height: 36px; background: var(--detalle); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .cat-icono svg { width: 18px; height: 18px; }
-
     .cat-info { flex: 1; min-width: 0; }
     .cat-nombre { font-size: 15px; font-weight: 500; }
     .cat-sub { font-size: 11px; opacity: 0.5; margin-top: 2px; }
-
-    .cat-badge {
-      font-size: 11px; font-weight: 500;
-      padding: 3px 10px; border-radius: 999px;
-      background: var(--detalle); color: var(--principal);
-      white-space: nowrap;
-    }
+    .cat-badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 999px; background: var(--detalle); color: var(--principal); white-space: nowrap; }
     .cat-badge.ok { background: #d4edda; color: var(--exito); }
     .cat-badge.alerta { background: #fdecea; color: var(--error); }
-
     .cat-arrow { color: var(--acento); flex-shrink: 0; }
     .cat-arrow svg { width: 16px; height: 16px; transition: transform 0.2s; }
     .categoria.abierta .cat-arrow svg { transform: rotate(90deg); }
-
-    /* ── Cuerpo categoría ── */
-    .cat-cuerpo {
-      display: none;
-      border-top: 1px solid var(--detalle);
-      padding: 16px;
-    }
+    .cat-cuerpo { display: none; border-top: 1px solid var(--detalle); padding: 16px; }
     .categoria.abierta .cat-cuerpo { display: block; }
 
-    /* ── Datos del evento ── */
-    .datos-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .dato-fila {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-    }
-    .dato-label {
-      font-size: 10px; font-weight: 500;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--acento); width: 80px; flex-shrink: 0;
-      padding-top: 9px;
-    }
-    .dato-input {
-      flex: 1;
-      background: var(--fondo);
-      border: 1px solid var(--detalle);
-      border-radius: 7px;
-      padding: 8px 11px;
-      font-family: var(--sans); font-size: 14px; font-weight: 300;
-      color: var(--principal); outline: none;
-      transition: border-color 0.15s;
-      -webkit-appearance: none;
-    }
+    /* Datos */
+    .datos-grid { display: flex; flex-direction: column; gap: 10px; }
+    .dato-fila { display: flex; align-items: flex-start; gap: 10px; }
+    .dato-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--acento); width: 80px; flex-shrink: 0; padding-top: 9px; }
+    .dato-input { flex: 1; background: var(--fondo); border: 1px solid var(--detalle); border-radius: 7px; padding: 8px 11px; font-family: var(--sans); font-size: 14px; font-weight: 300; color: var(--principal); outline: none; transition: border-color 0.15s; -webkit-appearance: none; }
     .dato-input:focus { border-color: var(--acento); }
-    .btn-mapa {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--detalle); color: var(--principal);
-      border: none; border-radius: 7px;
-      padding: 8px 12px; font-family: var(--sans);
-      font-size: 12px; cursor: pointer;
-      text-decoration: none;
-      transition: background 0.15s;
-      flex-shrink: 0;
-    }
+    .btn-mapa { display: inline-flex; align-items: center; gap: 6px; background: var(--detalle); color: var(--principal); border: none; border-radius: 7px; padding: 8px 12px; font-family: var(--sans); font-size: 12px; cursor: pointer; text-decoration: none; transition: background 0.15s; flex-shrink: 0; }
     .btn-mapa:hover { background: var(--acento); }
     .btn-mapa svg { width: 13px; height: 13px; }
 
-    /* ── Materiales ── */
+    /* Materiales */
     .mat-lista { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
-    .mat-fila {
-      display: grid;
-      grid-template-columns: 24px 1fr 90px 28px;
-      gap: 8px;
-      align-items: center;
-      background: var(--fondo);
-      border-radius: 7px;
-      padding: 8px 10px;
-      transition: opacity 0.15s;
-    }
+    .mat-fila { display: grid; grid-template-columns: 24px 1fr 90px 28px; gap: 8px; align-items: center; background: var(--fondo); border-radius: 7px; padding: 8px 10px; transition: opacity 0.15s; }
     .mat-fila.listo { opacity: 0.45; }
     .mat-fila.listo .mat-nom { text-decoration: line-through; }
-
-    .mat-check {
-      width: 18px; height: 18px;
-      border: 1.5px solid var(--acento);
-      border-radius: 4px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      transition: background 0.15s, border-color 0.15s;
-    }
+    .mat-check { width: 18px; height: 18px; border: 1.5px solid var(--acento); border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s, border-color 0.15s; }
     .mat-check.checked { background: var(--exito); border-color: var(--exito); }
     .mat-check svg { display: none; width: 10px; height: 10px; }
     .mat-check.checked svg { display: block; }
-
-    .mat-nom {
-      background: none; border: none;
-      border-bottom: 1px solid transparent;
-      font-family: var(--sans); font-size: 14px; font-weight: 300;
-      color: var(--principal); outline: none; width: 100%;
-      padding: 1px 2px; transition: border-color 0.15s;
-    }
+    .mat-nom { background: none; border: none; border-bottom: 1px solid transparent; font-family: var(--sans); font-size: 14px; font-weight: 300; color: var(--principal); outline: none; width: 100%; padding: 1px 2px; transition: border-color 0.15s; }
     .mat-nom:focus { border-bottom-color: var(--acento); }
-
-    .mat-costo {
-      background: none; border: 1px solid var(--detalle);
-      border-radius: 6px; text-align: right;
-      font-family: var(--sans); font-size: 13px; font-weight: 300;
-      color: var(--principal); outline: none;
-      padding: 4px 7px; width: 100%;
-      transition: border-color 0.15s; -webkit-appearance: none;
-    }
+    .mat-costo { background: none; border: 1px solid var(--detalle); border-radius: 6px; text-align: right; font-family: var(--sans); font-size: 13px; font-weight: 300; color: var(--principal); outline: none; padding: 4px 7px; width: 100%; transition: border-color 0.15s; -webkit-appearance: none; }
     .mat-costo:focus { border-color: var(--acento); }
-
-    .btn-del {
-      background: none; border: none; cursor: pointer;
-      color: var(--acento); display: flex; align-items: center; justify-content: center;
-      border-radius: 4px; padding: 3px;
-      transition: color 0.15s;
-    }
+    .btn-del { background: none; border: none; cursor: pointer; color: var(--acento); display: flex; align-items: center; justify-content: center; border-radius: 4px; padding: 3px; transition: color 0.15s; }
     .btn-del:hover { color: var(--error); }
     .btn-del svg { width: 13px; height: 13px; }
-
-    .btn-add-mat {
-      width: 100%;
-      background: transparent;
-      border: 1.5px dashed var(--acento);
-      color: var(--acento);
-      font-family: var(--sans); font-size: 12px;
-      padding: 9px; border-radius: 8px;
-      cursor: pointer; transition: background 0.15s;
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-      margin-bottom: 12px;
-    }
+    .btn-add-mat { width: 100%; background: transparent; border: 1.5px dashed var(--acento); color: var(--acento); font-family: var(--sans); font-size: 12px; padding: 9px; border-radius: 8px; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 12px; }
     .btn-add-mat:hover { background: var(--detalle); }
     .btn-add-mat svg { width: 12px; height: 12px; }
 
-    /* ── Total y guardar ── */
-    .cat-footer {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      padding-top: 12px;
-      border-top: 1px solid var(--detalle);
-      gap: 10px;
-    }
+    /* Footer categoría */
+    .cat-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--detalle); gap: 10px; }
     .total-wrap { display: flex; align-items: baseline; gap: 8px; }
     .total-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--acento); }
     .total-num { font-family: var(--serif); font-size: 26px; font-weight: 300; }
-
-    .btn-save {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: var(--principal); color: var(--fondo);
-      font-family: var(--sans); font-size: 12px; font-weight: 500;
-      letter-spacing: 0.05em; padding: 0 18px; height: 32px;
-      border: none; border-radius: 999px; cursor: pointer;
-      transition: background 0.15s;
-    }
+    .btn-save { display: inline-flex; align-items: center; gap: 5px; background: var(--principal); color: var(--fondo); font-family: var(--sans); font-size: 12px; font-weight: 500; letter-spacing: 0.05em; padding: 0 18px; height: 32px; border: none; border-radius: 999px; cursor: pointer; transition: background 0.15s; }
     .btn-save:hover { background: var(--acento); }
-
-    /* ── Eliminar evento ── */
-    .btn-del-evento {
-      width: 100%;
-      background: transparent; color: var(--error);
-      font-family: var(--sans); font-size: 12px;
-      padding: 10px;
-      border: 1px solid rgba(185,74,58,0.2);
-      border-radius: 8px; cursor: pointer;
-      margin-top: 6px;
-      transition: background 0.15s;
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-    }
+    .btn-del-evento { width: 100%; background: transparent; color: var(--error); font-family: var(--sans); font-size: 12px; padding: 10px; border: 1px solid rgba(185,74,58,0.2); border-radius: 8px; cursor: pointer; margin-top: 6px; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .btn-del-evento:hover { background: rgba(185,74,58,0.05); }
     .btn-del-evento svg { width: 13px; height: 13px; }
 
     /* Toast */
-    .toast {
-      position: fixed; bottom: 16px; right: 16px;
-      background: var(--principal); color: var(--fondo);
-      font-size: 12px; padding: 9px 14px;
-      border-radius: 8px; z-index: 300;
-      transform: translateY(50px); opacity: 0;
-      transition: all 0.25s;
-    }
+    .toast { position: fixed; bottom: 16px; right: 16px; background: var(--principal); color: var(--fondo); font-size: 12px; padding: 9px 14px; border-radius: 8px; z-index: 400; transform: translateY(50px); opacity: 0; transition: all 0.25s; }
     .toast.visible { transform: translateY(0); opacity: 1; }
 
-    /* Modal nuevo evento */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(85,82,79,0.45); backdrop-filter: blur(4px);
-      z-index: 300; align-items: center; justify-content: center; padding: 16px;
-    }
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(85,82,79,0.45); backdrop-filter: blur(4px); z-index: 300; align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.visible { display: flex; }
-    .modal {
-      background: var(--fondo); border-radius: 14px;
-      width: 100%; max-width: 440px;
-      box-shadow: 0 20px 60px rgba(85,82,79,0.2);
-    }
-    .modal-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 18px 0; margin-bottom: 14px;
-    }
+    .modal { background: var(--fondo); border-radius: 14px; width: 100%; max-width: 440px; box-shadow: 0 20px 60px rgba(85,82,79,0.2); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 18px 0; margin-bottom: 14px; }
     .modal-tit { font-family: var(--serif); font-size: 22px; font-weight: 300; }
     .modal-tit em { font-style: italic; color: var(--acento); }
-    .btn-x { background: none; border: none; cursor: pointer; color: var(--acento); display: flex; align-items: center; }
+    .btn-x { background: none; border: none; cursor: pointer; color: var(--acento); display: flex; }
     .btn-x svg { width: 16px; height: 16px; }
     .modal-body { padding: 0 18px 18px; }
     .m-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
     .mc { display: flex; flex-direction: column; gap: 3px; }
     .mc.full { grid-column: 1 / -1; }
     .mc label { font-size: 9px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--acento); }
-    .mc input {
-      background: var(--blanco); border: 1.5px solid var(--detalle);
-      border-radius: 7px; padding: 9px 10px;
-      font-family: var(--sans); font-size: 14px; font-weight: 300;
-      color: var(--principal); outline: none; width: 100%;
-      transition: border-color 0.2s; -webkit-appearance: none;
-    }
+    .mc input { background: var(--blanco); border: 1.5px solid var(--detalle); border-radius: 7px; padding: 9px 10px; font-family: var(--sans); font-size: 14px; font-weight: 300; color: var(--principal); outline: none; width: 100%; transition: border-color 0.2s; -webkit-appearance: none; }
     .mc input:focus { border-color: var(--acento); }
-    .btn-crear {
-      width: 100%; background: var(--principal); color: var(--fondo);
-      font-family: var(--sans); font-size: 12px; font-weight: 500;
-      letter-spacing: 0.05em; padding: 12px;
-      border: none; border-radius: 999px; cursor: pointer;
-      margin-top: 14px; transition: background 0.15s;
-    }
+    .btn-crear { width: 100%; background: var(--principal); color: var(--fondo); font-family: var(--sans); font-size: 12px; font-weight: 500; letter-spacing: 0.05em; padding: 12px; border: none; border-radius: 999px; cursor: pointer; margin-top: 14px; transition: background 0.15s; }
     .btn-crear:hover { background: var(--acento); }
-
     input[type="date"], input[type="time"] { -webkit-appearance: none; }
+
+    /* Mobile */
     @media (max-width: 680px) {
       body { display: block; }
       .sidebar { transform: translateX(-100%); }
       .sidebar.abierto { transform: translateX(0); }
       .main-wrap { margin-left: 0; }
       .topbar-mobile { display: flex; }
+      .eventos-layout { flex-direction: column; height: auto; overflow: visible; }
+      .col-lista { width: 100%; border-right: none; border-bottom: 1px solid var(--detalle); max-height: none; }
+      .col-detalle { padding: 16px 14px; }
       .mc input, .dato-input { font-size: 16px; }
       .m-grid { grid-template-columns: 1fr; }
       .mc.full { grid-column: 1; }
-      .dropdown { top: calc(64px + 58px); }
-      .selector-bar { top: 64px; }
     }
   </style>
 </head>
@@ -480,24 +184,9 @@
       <img src="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" alt="Let's Party" />
     </div>
     <ul class="sidebar-nav">
-      <li>
-        <a href="dashboard.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-          Dashboard
-        </a>
-      </li>
-      <li>
-        <a href="eventos.html" class="activo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          Eventos
-        </a>
-      </li>
-      <li>
-        <a href="calendario.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="8" cy="16" r="1" fill="currentColor"/><circle cx="12" cy="16" r="1" fill="currentColor"/><circle cx="16" cy="16" r="1" fill="currentColor"/></svg>
-          Calendario
-        </a>
-      </li>
+      <li><a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a></li>
+      <li><a href="eventos.html" class="activo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Eventos</a></li>
+      <li><a href="calendario.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="8" cy="16" r="1" fill="currentColor"/><circle cx="12" cy="16" r="1" fill="currentColor"/><circle cx="16" cy="16" r="1" fill="currentColor"/></svg>Calendario</a></li>
     </ul>
     <div class="sidebar-footer">
       <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
@@ -506,47 +195,45 @@
 
   <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-  <!-- Main wrap -->
   <div class="main-wrap">
+    <!-- Topbar mobile -->
+    <div class="topbar-mobile">
+      <button class="btn-hamburguesa" id="btn-hamburguesa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#FBF8F1" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <img src="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" alt="Let's Party" />
+      <div style="width:38px"></div>
+    </div>
 
-  <!-- Topbar mobile -->
-  <div class="topbar-mobile" id="topbar-mobile">
-    <button class="btn-hamburguesa" id="btn-hamburguesa">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#FBF8F1" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-    </button>
-    <img src="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" alt="Let's Party" />
-    <div style="width:36px"></div>
-  </div>
+    <!-- Layout dos columnas -->
+    <div class="eventos-layout">
 
-  <!-- Selector de evento -->
-  <div class="selector-bar">
-    <div class="btn-selector" id="btn-selector">
-      <div class="selector-texto">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-        <div>
-          <div class="selector-nombre" id="selector-nombre">Selecciona un evento</div>
-          <div class="selector-sub" id="selector-sub">—</div>
+      <!-- Columna izquierda: lista -->
+      <div class="col-lista">
+        <div class="col-lista-header">
+          <div class="col-lista-titulo"><em>Eventos</em></div>
+          <button class="btn-nuevo" id="btn-nuevo-ev" title="Nuevo evento">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+        <div class="lista-eventos" id="lista-eventos">
+          <div class="lista-vacia">
+            <p>Sin eventos</p>
+            <span>Crea uno con el botón +</span>
+          </div>
         </div>
       </div>
-      <span class="selector-chevron" id="selector-chevron">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-      </span>
-    </div>
-    <button class="btn-nuevo-ev" id="btn-nuevo-ev" title="Nuevo evento">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-    </button>
-  </div>
 
-  <!-- Dropdown -->
-  <div class="dropdown" id="dropdown"></div>
+      <!-- Columna derecha: detalle -->
+      <div class="col-detalle" id="col-detalle">
+        <div class="sin-evento" id="sin-evento">
+          <p>Selecciona un evento</p>
+          <span>Elige un evento de la lista para ver su detalle</span>
+        </div>
+        <div id="categorias" style="display:none"></div>
+      </div>
 
-  <!-- Body principal -->
-  <div class="body-wrap" id="body-wrap">
-    <div class="sin-evento" id="sin-evento">
-      <p>Sin evento seleccionado</p>
-      <span>Selecciona o crea un evento arriba</span>
     </div>
-    <div id="categorias" style="display:none"></div>
   </div>
 
   <!-- Modal nuevo evento -->
@@ -573,16 +260,12 @@
     </div>
   </div>
 
-  </div><!-- /main-wrap -->
-
   <div class="toast" id="toast"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, enableIndexedDbPersistence, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, Timestamp }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { initializeFirestore, persistentLocalCache, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const cfg = {
       apiKey: "AIzaSyB6nm7Ttl2Iuevbp6gp-GsBk4-06I6Z5Bc",
@@ -594,8 +277,7 @@
     };
     const app  = initializeApp(cfg);
     const auth = getAuth(app);
-    const db   = getFirestore(app);
-    enableIndexedDbPersistence(db).catch(() => {});
+    const db   = initializeFirestore(app, { localCache: persistentLocalCache() });
     const MES  = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
 
     let eventos = [];
@@ -607,42 +289,23 @@
     });
 
     // Hamburguesa
-    const sidebarEl  = document.getElementById("sidebar");
-    const sidebarOvl = document.getElementById("sidebar-overlay");
+    const sidebarEl = document.getElementById("sidebar");
+    const sidebarOv = document.getElementById("sidebar-overlay");
     document.getElementById("btn-hamburguesa").addEventListener("click", () => {
-      sidebarEl.classList.add("abierto");
-      sidebarOvl.classList.add("visible");
+      sidebarEl.classList.add("abierto"); sidebarOv.classList.add("visible");
     });
-    sidebarOvl.addEventListener("click", () => {
-      sidebarEl.classList.remove("abierto");
-      sidebarOvl.classList.remove("visible");
+    sidebarOv.addEventListener("click", () => {
+      sidebarEl.classList.remove("abierto"); sidebarOv.classList.remove("visible");
     });
 
-    // ── Dropdown selector ──
-    const dropdown = document.getElementById("dropdown");
-    const btnSel   = document.getElementById("btn-selector");
-    const chevron  = document.getElementById("selector-chevron");
-
-    btnSel.addEventListener("click", () => {
-      const open = dropdown.classList.toggle("visible");
-      chevron.classList.toggle("abierto", open);
-    });
-    document.addEventListener("click", e => {
-      if (!btnSel.contains(e.target) && !dropdown.contains(e.target)) {
-        dropdown.classList.remove("visible");
-        chevron.classList.remove("abierto");
-      }
-    });
-
-    // ── Modal ──
-    const overlay = document.getElementById("modal-overlay");
-    document.getElementById("btn-nuevo-ev").addEventListener("click", () => overlay.classList.add("visible"));
+    // Modal
+    const modalOverlay = document.getElementById("modal-overlay");
+    document.getElementById("btn-nuevo-ev").addEventListener("click", () => modalOverlay.classList.add("visible"));
     document.getElementById("btn-x").addEventListener("click", cerrarModal);
-    overlay.addEventListener("click", e => { if (e.target === overlay) cerrarModal(); });
+    modalOverlay.addEventListener("click", e => { if (e.target === modalOverlay) cerrarModal(); });
     function cerrarModal() {
-      overlay.classList.remove("visible");
-      ["n-orden","n-fecha","n-hora","n-tel","n-cliente","n-venue","n-dir"]
-        .forEach(id => document.getElementById(id).value = "");
+      modalOverlay.classList.remove("visible");
+      ["n-orden","n-fecha","n-hora","n-tel","n-cliente","n-venue","n-dir"].forEach(id => document.getElementById(id).value = "");
     }
 
     document.getElementById("btn-crear").addEventListener("click", async () => {
@@ -652,66 +315,60 @@
       if (!orden || !fecha || !cliente) { toast("Orden, fecha y cliente son obligatorios"); return; }
       const ref = await addDoc(collection(db, "eventos"), {
         orden, fecha,
-        hora:      document.getElementById("n-hora").value,
+        hora:       document.getElementById("n-hora").value,
         cliente,
-        telefono:  document.getElementById("n-tel").value.trim(),
-        venue:     document.getElementById("n-venue").value.trim(),
-        direccion: document.getElementById("n-dir").value.trim(),
+        telefono:   document.getElementById("n-tel").value.trim(),
+        venue:      document.getElementById("n-venue").value.trim(),
+        direccion:  document.getElementById("n-dir").value.trim(),
         materiales: [],
-        creadoEn:  Timestamp.now()
+        creadoEn:   Timestamp.now()
       });
       toast("Evento creado");
       cerrarModal();
       seleccionarEvento(ref.id);
     });
 
-    // ── Snapshot ──
+    // Snapshot
     onSnapshot(query(collection(db, "eventos"), orderBy("fecha", "asc")), snap => {
       eventos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderDropdown();
+      renderLista();
       if (eventoActual) {
         const ev = eventos.find(e => e.id === eventoActual);
         if (ev) renderCategorias(ev);
       }
     });
 
-    function renderDropdown() {
+    function renderLista() {
+      const contenedor = document.getElementById("lista-eventos");
       if (eventos.length === 0) {
-        dropdown.innerHTML = `<div class="dropdown-empty">Sin eventos — crea uno con el botón +</div>`;
+        contenedor.innerHTML = `<div class="lista-vacia"><p>Sin eventos</p><span>Crea uno con el botón +</span></div>`;
         return;
       }
-      dropdown.innerHTML = eventos.map(e => {
-        const [año, mes, dia] = (e.fecha||"").split("-");
+      contenedor.innerHTML = eventos.map(ev => {
+        const [año, mes, dia] = (ev.fecha||"").split("-");
         const fechaStr = mes ? `${dia} ${MES[parseInt(mes)-1]} ${año}` : "—";
         return `
-          <div class="dropdown-item${e.id === eventoActual ? " activo" : ""}" data-id="${e.id}">
-            <div>
-              <div class="di-nombre">${e.cliente||"—"}</div>
-              <div class="di-meta">${fechaStr} · ${e.hora||"—"} · ${e.venue||"—"}</div>
+          <div class="ev-item${ev.id === eventoActual ? " activo" : ""}" data-id="${ev.id}">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="flex:1;min-width:0">
+                <div class="ev-item-nombre">${ev.cliente || "—"}</div>
+                <div class="ev-item-meta"><span>${fechaStr}</span>${ev.hora ? `<span>· ${ev.hora}</span>` : ""}</div>
+              </div>
+              <span class="ev-item-orden">${ev.orden || ""}</span>
             </div>
-            <span class="di-orden">${e.orden||""}</span>
           </div>`;
       }).join("");
 
-      dropdown.querySelectorAll(".dropdown-item").forEach(item => {
-        item.addEventListener("click", () => {
-          seleccionarEvento(item.dataset.id);
-          dropdown.classList.remove("visible");
-          chevron.classList.remove("abierto");
-        });
+      contenedor.querySelectorAll(".ev-item").forEach(item => {
+        item.addEventListener("click", () => seleccionarEvento(item.dataset.id));
       });
     }
 
     function seleccionarEvento(id) {
       eventoActual = id;
+      renderLista();
       const ev = eventos.find(e => e.id === id);
-      if (!ev) return;
-      const [año, mes, dia] = (ev.fecha||"").split("-");
-      document.getElementById("selector-nombre").textContent = ev.cliente || "—";
-      document.getElementById("selector-sub").textContent =
-        `${dia||"—"} ${mes ? MES[parseInt(mes)-1] : ""} ${año||""} · ${ev.orden||""}`;
-      renderCategorias(ev);
-      renderDropdown();
+      if (ev) renderCategorias(ev);
     }
 
     function renderCategorias(ev) {
@@ -721,43 +378,31 @@
       const mats   = ev.materiales || [];
       const total  = mats.reduce((s, m) => s + (parseFloat(m.costo)||0), 0);
       const listos = mats.filter(m => m.listo).length;
-
       wrap.innerHTML = "";
 
-      // ── Cat 1: Datos del evento ──
       const cat1 = crearCategoria({
         icono: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`,
-        nombre: "Datos del evento",
-        sub: `${ev.orden||""} · ${ev.fecha||""}`,
-        badge: null,
-        contenido: buildDatos(ev)
+        nombre: "Datos del evento", sub: `${ev.orden||""} · ${ev.fecha||""}`,
+        badge: null, contenido: buildDatos(ev)
       });
       wrap.appendChild(cat1);
 
-      // ── Cat 2: Materiales ──
-      const matBadge = mats.length > 0
-        ? { texto: `${listos}/${mats.length}`, tipo: listos === mats.length ? "ok" : "" }
-        : null;
       const cat2 = crearCategoria({
         icono: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/><path d="M9 12l2 2 4-4"/></svg>`,
-        nombre: "Materiales",
-        sub: mats.length > 0 ? `${listos} de ${mats.length} listos` : "Sin materiales",
-        badge: matBadge,
+        nombre: "Materiales", sub: mats.length > 0 ? `${listos} de ${mats.length} listos` : "Sin materiales",
+        badge: mats.length > 0 ? { texto: `${listos}/${mats.length}`, tipo: listos === mats.length ? "ok" : "" } : null,
         contenido: buildMateriales(ev, mats, total)
       });
       wrap.appendChild(cat2);
 
-      // ── Cat 3: Gastos ──
       const cat3 = crearCategoria({
         icono: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>`,
-        nombre: "Gastos",
-        sub: total > 0 ? `Total $${total.toLocaleString("es-MX")}` : "Sin gastos registrados",
+        nombre: "Gastos", sub: total > 0 ? `Total $${total.toLocaleString("es-MX")}` : "Sin gastos",
         badge: total > 0 ? { texto: `$${total.toLocaleString("es-MX")}`, tipo: "" } : null,
         contenido: buildGastos(ev, mats, total)
       });
       wrap.appendChild(cat3);
 
-      // Eliminar evento
       const btnDel = document.createElement("button");
       btnDel.className = "btn-del-evento";
       btnDel.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg> Eliminar evento`;
@@ -765,15 +410,12 @@
         if (!confirm("¿Eliminar este evento?")) return;
         await deleteDoc(doc(db, "eventos", ev.id));
         eventoActual = null;
-        document.getElementById("selector-nombre").textContent = "Selecciona un evento";
-        document.getElementById("selector-sub").textContent = "—";
-        document.getElementById("sin-evento").style.display = "block";
+        document.getElementById("sin-evento").style.display = "flex";
         wrap.style.display = "none";
         toast("Evento eliminado");
       });
       wrap.appendChild(btnDel);
 
-      // Attach eventos de las categorías
       attachDatos(cat1, ev);
       attachMateriales(cat2, ev, mats);
     }
@@ -784,17 +426,12 @@
       cat.innerHTML = `
         <div class="cat-cabecera">
           <div class="cat-icono">${icono}</div>
-          <div class="cat-info">
-            <div class="cat-nombre">${nombre}</div>
-            <div class="cat-sub">${sub}</div>
-          </div>
+          <div class="cat-info"><div class="cat-nombre">${nombre}</div><div class="cat-sub">${sub}</div></div>
           ${badge ? `<span class="cat-badge${badge.tipo ? " "+badge.tipo : ""}">${badge.texto}</span>` : ""}
           <span class="cat-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
         </div>
         <div class="cat-cuerpo">${contenido}</div>`;
-      cat.querySelector(".cat-cabecera").addEventListener("click", () => {
-        cat.classList.toggle("abierta");
-      });
+      cat.querySelector(".cat-cabecera").addEventListener("click", () => cat.classList.toggle("abierta"));
       return cat;
     }
 
@@ -815,58 +452,40 @@
             ${mapUrl ? `<a class="btn-mapa" href="${mapUrl}" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-6.686-7-11a7 7 0 1114 0c0 4.314-7 11-7 11z"/><circle cx="12" cy="10" r="2"/></svg>Ver</a>` : ""}
           </div>
         </div>
-        <div class="cat-footer" style="margin-top:14px">
-          <div></div>
-          <button class="btn-save btn-save-datos">Guardar datos</button>
-        </div>`;
+        <div class="cat-footer" style="margin-top:14px"><div></div><button class="btn-save btn-save-datos">Guardar datos</button></div>`;
     }
 
     function buildMateriales(ev, mats, total) {
       return `
-        <div class="mat-lista">
-          ${mats.map(m => matRow(m)).join("")}
-        </div>
-        <button class="btn-add-mat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-          Agregar material
-        </button>
+        <div class="mat-lista">${mats.map(m => matRow(m)).join("")}</div>
+        <button class="btn-add-mat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Agregar material</button>
         <div class="cat-footer">
-          <div class="total-wrap">
-            <span class="total-label">Total</span>
-            <span class="total-num">$${total.toLocaleString("es-MX",{minimumFractionDigits:2})}</span>
-          </div>
+          <div class="total-wrap"><span class="total-label">Total</span><span class="total-num">$${total.toLocaleString("es-MX",{minimumFractionDigits:2})}</span></div>
           <button class="btn-save btn-save-mats">Guardar</button>
         </div>`;
     }
 
     function buildGastos(ev, mats, total) {
-      if (mats.length === 0) return `<p style="font-size:13px;opacity:0.5;text-align:center;padding:20px">Sin materiales con costo registrados</p>`;
+      if (mats.length === 0) return `<p style="font-size:13px;opacity:0.5;text-align:center;padding:20px">Sin materiales con costo</p>`;
       return `
         <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
           ${mats.filter(m => parseFloat(m.costo) > 0).map(m => `
             <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--fondo);border-radius:7px">
-              <span style="font-size:13px${m.listo ? ";opacity:0.45;text-decoration:line-through" : ""}">${m.nombre}</span>
+              <span style="font-size:13px${m.listo?";opacity:0.45;text-decoration:line-through":""}">${m.nombre}</span>
               <span style="font-family:var(--serif);font-size:16px;font-weight:300">$${parseFloat(m.costo).toLocaleString("es-MX")}</span>
             </div>`).join("")}
         </div>
         <div class="cat-footer">
-          <div class="total-wrap">
-            <span class="total-label">Total</span>
-            <span class="total-num">$${total.toLocaleString("es-MX",{minimumFractionDigits:2})}</span>
-          </div>
+          <div class="total-wrap"><span class="total-label">Total</span><span class="total-num">$${total.toLocaleString("es-MX",{minimumFractionDigits:2})}</span></div>
         </div>`;
     }
 
     function matRow(m) {
       return `<div class="mat-fila${m.listo?" listo":""}">
-        <div class="mat-check${m.listo?" checked":""}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
-        </div>
+        <div class="mat-check${m.listo?" checked":""}"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
         <input class="mat-nom" type="text" value="${m.nombre||""}" />
         <input class="mat-costo" type="number" min="0" step="0.01" value="${m.costo||""}" />
-        <button class="btn-del">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
+        <button class="btn-del"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
       </div>`;
     }
 
@@ -876,15 +495,14 @@
         const c = cat.querySelector(".cat-cuerpo");
         const dir = c.querySelector(".d-dir").value.trim();
         await updateDoc(doc(db, "eventos", ev.id), {
-          orden:     c.querySelector(".d-orden").value.trim(),
-          cliente:   c.querySelector(".d-cliente").value.trim(),
-          telefono:  c.querySelector(".d-tel").value.trim(),
-          fecha:     c.querySelector(".d-fecha").value,
-          hora:      c.querySelector(".d-hora").value,
-          venue:     c.querySelector(".d-venue").value.trim(),
+          orden: c.querySelector(".d-orden").value.trim(),
+          cliente: c.querySelector(".d-cliente").value.trim(),
+          telefono: c.querySelector(".d-tel").value.trim(),
+          fecha: c.querySelector(".d-fecha").value,
+          hora: c.querySelector(".d-hora").value,
+          venue: c.querySelector(".d-venue").value.trim(),
           direccion: dir
         });
-        // Actualizar link mapa
         const mapUrl = dir ? `https://maps.google.com/?q=${encodeURIComponent(dir)}` : "";
         let btnMapa = c.querySelector(".btn-mapa");
         if (mapUrl && !btnMapa) {
@@ -901,8 +519,6 @@
     function attachMateriales(cat, ev, mats) {
       const cuerpo = cat.querySelector(".cat-cuerpo");
       cuerpo.addEventListener("click", e => e.stopPropagation());
-
-      // Checkbox
       cuerpo.addEventListener("click", e => {
         const chk = e.target.closest(".mat-check");
         if (!chk) return;
@@ -910,33 +526,25 @@
         chk.closest(".mat-fila").classList.toggle("listo");
         recalc(cuerpo);
       });
-
-      // Borrar
       cuerpo.addEventListener("click", e => {
         const btn = e.target.closest(".btn-del");
         if (!btn) return;
         btn.closest(".mat-fila").remove();
         recalc(cuerpo);
       });
-
-      // Agregar
       cuerpo.querySelector(".btn-add-mat").addEventListener("click", () => {
         const lista = cuerpo.querySelector(".mat-lista");
         const tmp = document.createElement("div");
         tmp.innerHTML = matRow({ nombre:"", costo:"", listo:false });
         lista.appendChild(tmp.firstElementChild);
       });
-
-      // Recalc al editar
       cuerpo.addEventListener("input", e => {
         if (e.target.classList.contains("mat-costo")) recalc(cuerpo);
       });
-
-      // Guardar
       cuerpo.querySelector(".btn-save-mats").addEventListener("click", async () => {
         const materiales = [];
         cuerpo.querySelectorAll(".mat-fila").forEach(f => {
-          const nom   = f.querySelector(".mat-nom").value.trim();
+          const nom = f.querySelector(".mat-nom").value.trim();
           const costo = parseFloat(f.querySelector(".mat-costo").value) || 0;
           const listo = f.classList.contains("listo");
           if (nom) materiales.push({ nombre: nom, costo, listo });
@@ -955,8 +563,7 @@
 
     function toast(msg) {
       const t = document.getElementById("toast");
-      t.textContent = msg;
-      t.classList.add("visible");
+      t.textContent = msg; t.classList.add("visible");
       setTimeout(() => t.classList.remove("visible"), 2500);
     }
   </script>
