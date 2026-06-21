@@ -296,6 +296,7 @@
           <div class="mc"><label>Teléfono</label><input type="tel" id="n-tel" /></div>
           <div class="mc full"><label>Cliente</label><input type="text" id="n-cliente" /></div>
           <div class="mc"><label>Venue</label><input type="text" id="n-venue" /></div>
+          <div class="mc"><label>Temática</label><input type="text" id="n-tematica" /></div>
           <div class="mc full"><label>Dirección</label><input type="text" id="n-dir" /></div>
         </div>
         <button class="btn-crear" id="btn-crear">Crear evento</button>
@@ -370,7 +371,7 @@
     modalOverlay.addEventListener("click", e => { if (e.target === modalOverlay) cerrarModal(); });
     function cerrarModal() {
       modalOverlay.classList.remove("visible");
-      ["n-orden","n-fecha","n-hora","n-tel","n-cliente","n-venue","n-dir"].forEach(id => document.getElementById(id).value = "");
+      ["n-orden","n-fecha","n-hora","n-tel","n-cliente","n-venue","n-tematica","n-dir"].forEach(id => document.getElementById(id).value = "");
     }
 
     document.getElementById("btn-crear").addEventListener("click", async () => {
@@ -384,6 +385,7 @@
         cliente,
         telefono:   document.getElementById("n-tel").value.trim(),
         venue:      document.getElementById("n-venue").value.trim(),
+        tematica:   document.getElementById("n-tematica").value.trim(),
         direccion:  document.getElementById("n-dir").value.trim(),
         materiales: [],
         creadoEn:   Timestamp.now()
@@ -541,6 +543,7 @@
           <div class="dato-fila"><span class="dato-label">Fecha</span><input class="dato-input d-fecha" type="date" value="${ev.fecha||""}" /></div>
           <div class="dato-fila"><span class="dato-label">Hora</span><input class="dato-input d-hora" type="time" value="${ev.hora||""}" /></div>
           <div class="dato-fila"><span class="dato-label">Venue</span><input class="dato-input d-venue" type="text" value="${ev.venue||""}" /></div>
+          <div class="dato-fila"><span class="dato-label">Temática</span><input class="dato-input d-tematica" type="text" value="${ev.tematica||""}" /></div>
           <div class="dato-fila">
             <span class="dato-label">Dirección</span>
             <input class="dato-input d-dir" type="text" value="${ev.direccion||""}" />
@@ -596,6 +599,7 @@
           fecha: c.querySelector(".d-fecha").value,
           hora: c.querySelector(".d-hora").value,
           venue: c.querySelector(".d-venue").value.trim(),
+          tematica: c.querySelector(".d-tematica").value.trim(),
           direccion: dir
         });
         const mapUrl = dir ? `https://maps.google.com/?q=${encodeURIComponent(dir)}` : "";
