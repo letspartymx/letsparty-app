@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#55524F" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Cotizaciones · Let's Party</title>
+  <link rel="icon" href="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="nav.js" defer></script>
+  <style>
+    :root {
+      --fondo: #FBF8F1; --principal: #55524F;
+      --detalle: #EFE6DD; --acento: #C2AFA0;
+      --blanco: #ffffff; --error: #b94a3a; --exito: #3a7d5a;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --sans: 'DM Sans', system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--fondo); color: var(--principal); font-family: var(--sans); font-size: 14px; font-weight: 300; min-height: 100vh; display: flex; }
+
+    /* Sidebar */
+    .sidebar { width: 220px; min-height: 100vh; background: var(--principal); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; transition: transform 0.3s; }
+    .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; }
+    .sidebar-logo img { height: 120px; width: auto; }
+    .sidebar-nav { flex: 1; padding: 16px 0; list-style: none; }
+    .sidebar-nav li a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; font-size: 13px; font-weight: 400; color: rgba(251,248,241,0.6); text-decoration: none; transition: color 0.2s, background 0.2s; }
+    .sidebar-nav li a:hover { color: var(--fondo); background: rgba(255,255,255,0.06); }
+    .sidebar-nav li a.activo { color: var(--fondo); background: rgba(255,255,255,0.12); }
+    .sidebar-nav li a svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .btn-logout { width: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(251,248,241,0.6); font-family: var(--sans); font-size: 12px; padding: 10px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+    .btn-logout:hover { background: rgba(255,255,255,0.08); color: var(--fondo); }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(85,82,79,0.45); z-index: 99; }
+    .sidebar-overlay.visible { display: block; }
+
+    /* Main */
+    .main { margin-left: 220px; flex: 1; padding: 32px; }
+
+    /* Topbar mobile */
+    .topbar-mobile { display: none; align-items: center; justify-content: space-between; margin-bottom: 16px; position: relative; padding-top: 8px; min-height: 96px; }
+    .topbar-mobile img { height: 80px; width: auto; position: absolute; left: 50%; transform: translateX(-50%); }
+    .btn-hamburguesa { background: var(--principal); border: none; border-radius: 10px; padding: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .btn-hamburguesa svg { width: 20px; height: 20px; }
+
+    /* Layout dos columnas */
+    .cot-layout { display: flex; gap: 0; min-height: calc(100vh - 64px); }
+
+    /* Columna lista */
+    .col-lista { width: 280px; flex-shrink: 0; border-right: 1px solid var(--detalle); background: var(--blanco); display: flex; flex-direction: column; border-radius: 12px 0 0 12px; overflow: hidden; }
+    .col-lista-header { padding: 16px; border-bottom: 1px solid var(--detalle); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .col-lista-titulo { font-family: var(--serif); font-size: 20px; font-weight: 300; }
+    .col-lista-titulo em { font-style: italic; color: var(--acento); }
+    .btn-nueva { display: inline-flex; align-items: center; justify-content: center; background: var(--acento); color: var(--principal); border: none; border-radius: 8px; width: 32px; height: 32px; cursor: pointer; transition: background 0.15s; }
+    .btn-nueva:hover { background: var(--detalle); }
+    .btn-nueva svg { width: 16px; height: 16px; }
+    .lista-cots { flex: 1; overflow-y: auto; padding: 8px; }
+    .cot-item { padding: 12px 14px; border-radius: 10px; cursor: pointer; transition: background 0.15s; border: 1px solid transparent; margin-bottom: 4px; }
+    .cot-item:hover { background: var(--fondo); }
+    .cot-item.activo { background: var(--fondo); border-color: var(--acento); }
+    .cot-item-nombre { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+    .cot-item-meta { font-size: 11px; opacity: 0.5; }
+    .cot-item-orden { font-size: 10px; font-weight: 500; color: var(--acento); background: var(--detalle); padding: 2px 7px; border-radius: 999px; display: inline-block; margin-top: 4px; }
+    .lista-vacia { text-align: center; padding: 40px 20px; }
+    .lista-vacia p { font-family: var(--serif); font-size: 18px; font-style: italic; color: var(--acento); margin-bottom: 4px; }
+    .lista-vacia span { font-size: 12px; opacity: 0.45; }
+
+    /* Columna detalle */
+    .col-detalle { flex: 1; overflow-y: auto; padding: 28px 32px; }
+    .sin-cot { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; text-align: center; opacity: 0.5; }
+    .sin-cot p { font-family: var(--serif); font-size: 22px; font-style: italic; color: var(--acento); margin-bottom: 6px; }
+
+    /* Formulario cotización */
+    .cot-form { background: var(--blanco); border: 1px solid var(--detalle); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+    .cot-form-titulo { font-family: var(--serif); font-size: 24px; font-weight: 300; margin-bottom: 20px; }
+    .cot-form-titulo em { font-style: italic; color: var(--acento); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .form-field { display: flex; flex-direction: column; gap: 4px; }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--acento); }
+    .form-input { background: var(--fondo); border: 1px solid var(--detalle); border-radius: 8px; padding: 9px 12px; font-family: var(--sans); font-size: 14px; font-weight: 300; color: var(--principal); outline: none; transition: border-color 0.15s; -webkit-appearance: none; }
+    .form-input:focus { border-color: var(--acento); }
+
+    /* Tabla servicios */
+    .tabla-header { display: grid; grid-template-columns: 1fr 80px 100px 100px 32px; gap: 8px; padding: 8px 10px; background: var(--fondo); border-radius: 8px; margin-bottom: 6px; }
+    .tabla-col-label { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--acento); }
+    .tabla-fila { display: grid; grid-template-columns: 1fr 80px 100px 100px 32px; gap: 8px; align-items: center; background: var(--fondo); border-radius: 8px; padding: 8px 10px; margin-bottom: 4px; }
+    .tabla-input { background: var(--blanco); border: 1px solid var(--detalle); border-radius: 6px; padding: 7px 9px; font-family: var(--sans); font-size: 13px; font-weight: 300; color: var(--principal); outline: none; width: 100%; transition: border-color 0.15s; -webkit-appearance: none; }
+    .tabla-input:focus { border-color: var(--acento); }
+    .tabla-input.readonly { background: transparent; border-color: transparent; font-weight: 400; }
+    .tabla-costo { font-family: var(--serif); font-size: 15px; font-weight: 300; padding: 7px 9px; }
+    .btn-del-fila { background: none; border: none; cursor: pointer; color: var(--acento); display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 4px; transition: color 0.15s; }
+    .btn-del-fila:hover { color: var(--error); }
+    .btn-del-fila svg { width: 13px; height: 13px; }
+    .btn-add-servicio { width: 100%; background: transparent; border: 1.5px dashed var(--acento); color: var(--acento); font-family: var(--sans); font-size: 12px; padding: 9px; border-radius: 8px; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 8px 0 16px; }
+    .btn-add-servicio:hover { background: var(--detalle); }
+    .btn-add-servicio svg { width: 12px; height: 12px; }
+
+    /* Totales */
+    .totales { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding: 16px; background: var(--fondo); border-radius: 8px; margin-bottom: 16px; }
+    .total-fila { display: flex; align-items: baseline; gap: 16px; }
+    .total-fila-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--acento); min-width: 80px; text-align: right; }
+    .total-fila-val { font-family: var(--serif); font-size: 22px; font-weight: 300; min-width: 140px; text-align: right; }
+    .total-fila-val.grande { font-size: 28px; }
+
+    /* Anticipo personalizable */
+    .anticipo-wrap { display: flex; align-items: center; gap: 8px; }
+    .anticipo-pct { background: var(--blanco); border: 1px solid var(--detalle); border-radius: 6px; padding: 4px 8px; font-family: var(--sans); font-size: 13px; width: 60px; text-align: center; outline: none; color: var(--principal); -webkit-appearance: none; }
+    .anticipo-pct:focus { border-color: var(--acento); }
+
+    /* Botones de acción */
+    .acciones { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-accion { display: inline-flex; align-items: center; gap: 6px; font-family: var(--sans); font-size: 12px; font-weight: 500; letter-spacing: 0.05em; padding: 0 18px; height: 36px; border: none; border-radius: 999px; cursor: pointer; transition: background 0.15s; }
+    .btn-accion svg { width: 14px; height: 14px; }
+    .btn-guardar { background: var(--principal); color: var(--fondo); }
+    .btn-guardar:hover { background: var(--acento); }
+    .btn-pdf { background: var(--detalle); color: var(--principal); }
+    .btn-pdf:hover { background: var(--acento); }
+    .btn-convertir { background: var(--exito); color: #fff; }
+    .btn-convertir:hover { background: #2d6348; }
+    .btn-eliminar { background: transparent; color: var(--error); border: 1px solid rgba(185,74,58,0.25); }
+    .btn-eliminar:hover { background: rgba(185,74,58,0.06); }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 16px; right: 16px; background: var(--principal); color: var(--fondo); font-size: 12px; padding: 9px 14px; border-radius: 8px; z-index: 400; transform: translateY(50px); opacity: 0; transition: all 0.25s; }
+    .toast.visible { transform: translateY(0); opacity: 1; }
+
+    /* ── ESTILOS DE IMPRESIÓN ── */
+    @media print {
+      body * { visibility: hidden; }
+      #pdf-preview, #pdf-preview * { visibility: visible; }
+      #pdf-preview { position: fixed; left: 0; top: 0; width: 100%; }
+      @page { margin: 0; size: A4; }
+    }
+
+    /* Mobile */
+    @media (max-width: 680px) {
+      body { display: block; }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.abierto { transform: translateX(0); }
+      .main { margin-left: 0; padding: 16px 14px; }
+      .topbar-mobile { display: flex; }
+      .cot-layout { flex-direction: column; }
+      .col-lista { width: 100%; border-right: none; border-radius: 12px; margin-bottom: 12px; }
+      .col-detalle { padding: 0; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-field.full { grid-column: 1; }
+      .tabla-header { display: none; }
+      .tabla-fila { grid-template-columns: 1fr 60px 80px 80px 28px; }
+      .form-input { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" alt="Let's Party" />
+    </div>
+    <ul class="sidebar-nav"></ul>
+    <div class="sidebar-footer">
+      <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <main class="main">
+    <div class="topbar-mobile">
+      <button class="btn-hamburguesa" id="btn-hamburguesa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#FBF8F1" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <img src="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" alt="Let's Party" />
+    </div>
+
+    <div class="cot-layout">
+
+      <!-- Lista de cotizaciones -->
+      <div class="col-lista">
+        <div class="col-lista-header">
+          <div class="col-lista-titulo"><em>Cotizaciones</em></div>
+          <button class="btn-nueva" id="btn-nueva" title="Nueva cotización">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+        <div class="lista-cots" id="lista-cots">
+          <div class="lista-vacia"><p>Sin cotizaciones</p><span>Crea una con el botón +</span></div>
+        </div>
+      </div>
+
+      <!-- Detalle / formulario -->
+      <div class="col-detalle" id="col-detalle">
+        <div class="sin-cot" id="sin-cot">
+          <p>Selecciona una cotización</p>
+          <span>O crea una nueva con el botón +</span>
+        </div>
+        <div id="cot-editor" style="display:none">
+
+          <div class="cot-form">
+            <div class="cot-form-titulo">Datos del <em>cliente</em></div>
+            <div class="form-grid">
+              <div class="form-field"><span class="form-label">Orden #</span><input class="form-input" id="f-orden" type="text" /></div>
+              <div class="form-field"><span class="form-label">Fecha cotización</span><input class="form-input" id="f-fecha-cot" type="date" /></div>
+              <div class="form-field"><span class="form-label">Cliente</span><input class="form-input" id="f-cliente" type="text" /></div>
+              <div class="form-field"><span class="form-label">Teléfono</span><input class="form-input" id="f-tel" type="tel" /></div>
+              <div class="form-field"><span class="form-label">Fecha del evento</span><input class="form-input" id="f-fecha-ev" type="date" /></div>
+              <div class="form-field"><span class="form-label">Hora</span><input class="form-input" id="f-hora" type="time" /></div>
+              <div class="form-field full"><span class="form-label">Venue</span><input class="form-input" id="f-venue" type="text" /></div>
+              <div class="form-field full"><span class="form-label">Descripción del servicio</span><input class="form-input" id="f-desc" type="text" placeholder="Ej. Decoración temática Frozen..." /></div>
+            </div>
+          </div>
+
+          <div class="cot-form">
+            <div class="cot-form-titulo"><em>Servicios</em></div>
+            <div class="tabla-header">
+              <span class="tabla-col-label">Servicio</span>
+              <span class="tabla-col-label">Cant</span>
+              <span class="tabla-col-label">Precio unit</span>
+              <span class="tabla-col-label">Total</span>
+              <span></span>
+            </div>
+            <div id="tabla-servicios"></div>
+            <button class="btn-add-servicio" id="btn-add-servicio">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              Agregar servicio
+            </button>
+
+            <div class="totales">
+              <div class="total-fila">
+                <span class="total-fila-label">Subtotal</span>
+                <span class="total-fila-val" id="t-subtotal">$0.00</span>
+              </div>
+              <div class="total-fila">
+                <span class="total-fila-label">Anticipo</span>
+                <div class="anticipo-wrap">
+                  <input class="anticipo-pct" id="anticipo-pct" type="number" min="1" max="100" value="50" />
+                  <span style="font-size:12px;color:var(--acento)">%</span>
+                  <span class="total-fila-val" id="t-anticipo">$0.00</span>
+                </div>
+              </div>
+              <div class="total-fila">
+                <span class="total-fila-label">Restante</span>
+                <span class="total-fila-val grande" id="t-restante">$0.00</span>
+              </div>
+            </div>
+
+            <div class="acciones">
+              <button class="btn-accion btn-guardar" id="btn-guardar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v14a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Guardar
+              </button>
+              <button class="btn-accion btn-pdf" id="btn-pdf">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Generar PDF
+              </button>
+              <button class="btn-accion btn-convertir" id="btn-convertir">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                Convertir a evento
+              </button>
+              <button class="btn-accion btn-eliminar" id="btn-eliminar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+                Eliminar
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Preview PDF oculto -->
+  <div id="pdf-preview" style="display:none"></div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { initializeFirestore, persistentLocalCache, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const cfg = {
+      apiKey: "AIzaSyB6nm7Ttl2Iuevbp6gp-GsBk4-06I6Z5Bc",
+      authDomain: "letsparty-db.firebaseapp.com",
+      projectId: "letsparty-db",
+      storageBucket: "letsparty-db.firebasestorage.app",
+      messagingSenderId: "274690779810",
+      appId: "1:274690779810:web:ce6f54b3ce8b39248505fb"
+    };
+
+    const TERMINOS = `Esta cotización tiene una vigencia de 10 días hábiles.
+Para respetar los costos de esta cotización es importante realizar un anticipo del 10%, el 50% 20 días antes del evento y liquidar el restante el día del montaje. (El anticipo no es reembolsable en caso de cancelación) NO DEVOLUCIONES.
+Se podrá posponer fecha en caso de que el contratante lo solicite (sujeto a disponibilidad).
+Recargo del 10% del total en caso de cambiar fecha.
+Requerimos que el contratante cuente con el espacio necesario para realizar el montaje contratado, así mismo la conexión eléctrica deberá estar cerca de la misma en caso de ser necesario, así como también será el responsable de tener al tanto al salón, jardín o lugar en donde se realizará el evento para que se nos permita el acceso para realizar el montaje mínimo 3hrs antes para terminar la decoración en tiempo y forma, y realizar el desmontaje al día siguiente o el mismo día al terminar el evento.
+En caso de que en el evento por cuestiones ajenas a nosotros se rompa, dañe o se extravíe algún objeto perteneciente a Let's Party, la reparación o pago de los mismos será responsabilidad del solicitante.
+En caso de que se tenga que pagar estacionamiento, etc los gastos corren por cuenta del solicitante.
+Considerar un espacio techado ya que el mobiliario no puede mojarse, se aconseja que la decoración no tenga exposición directa al sol o la intemperie, para mayor durabilidad de los globos.
+Precios sujetos a cambio sin previo aviso (una vez reservando la fecha se respeta el costo). Costos en Moneda Nacional.
+Una vez autorizado el diseño no hay cambios, ni es canjeable por otra decoración.`;
+
+    const app  = initializeApp(cfg);
+    const auth = getAuth(app);
+    const db   = initializeFirestore(app, { localCache: persistentLocalCache() });
+
+    let cotizaciones = [];
+    let cotActual = null;
+
+    onAuthStateChanged(auth, u => { if (!u) window.location.href = "index.html"; });
+    document.getElementById("btn-logout").addEventListener("click", async () => {
+      await signOut(auth); window.location.href = "index.html";
+    });
+
+
+    // Snapshot cotizaciones
+    onSnapshot(query(collection(db, "cotizaciones"), orderBy("fechaCot", "desc")), snap => {
+      cotizaciones = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderLista();
+      if (cotActual) {
+        const cot = cotizaciones.find(c => c.id === cotActual);
+        if (cot) cargarEditor(cot);
+      }
+    });
+
+    // Nueva cotización
+    document.getElementById("btn-nueva").addEventListener("click", async () => {
+      const ref = await addDoc(collection(db, "cotizaciones"), {
+        orden: "", cliente: "", telefono: "", fechaCot: new Date().toISOString().split("T")[0],
+        fechaEv: "", hora: "", venue: "", descripcion: "",
+        servicios: [{ nombre: "", cantidad: 1, precio: 0 }],
+        anticipo: 50, creadoEn: Timestamp.now()
+      });
+      cotActual = ref.id;
+      toast("Nueva cotización creada");
+    });
+
+    function renderLista() {
+      const contenedor = document.getElementById("lista-cots");
+      if (cotizaciones.length === 0) {
+        contenedor.innerHTML = `<div class="lista-vacia"><p>Sin cotizaciones</p><span>Crea una con el botón +</span></div>`;
+        return;
+      }
+      contenedor.innerHTML = cotizaciones.map(cot => `
+        <div class="cot-item${cot.id === cotActual ? " activo" : ""}" data-id="${cot.id}">
+          <div class="cot-item-nombre">${cot.cliente || "Sin nombre"}</div>
+          <div class="cot-item-meta">${cot.fechaEv || cot.fechaCot || "—"}</div>
+          <span class="cot-item-orden">${cot.orden || "—"}</span>
+        </div>`).join("");
+      contenedor.querySelectorAll(".cot-item").forEach(item => {
+        item.addEventListener("click", () => {
+          cotActual = item.dataset.id;
+          renderLista();
+          const cot = cotizaciones.find(c => c.id === cotActual);
+          if (cot) cargarEditor(cot);
+        });
+      });
+    }
+
+    function cargarEditor(cot) {
+      document.getElementById("sin-cot").style.display = "none";
+      document.getElementById("cot-editor").style.display = "block";
+      document.getElementById("f-orden").value      = cot.orden || "";
+      document.getElementById("f-fecha-cot").value  = cot.fechaCot || "";
+      document.getElementById("f-cliente").value    = cot.cliente || "";
+      document.getElementById("f-tel").value        = cot.telefono || "";
+      document.getElementById("f-fecha-ev").value   = cot.fechaEv || "";
+      document.getElementById("f-hora").value       = cot.hora || "";
+      document.getElementById("f-venue").value      = cot.venue || "";
+      document.getElementById("f-desc").value       = cot.descripcion || "";
+      document.getElementById("anticipo-pct").value = cot.anticipo || 50;
+      renderServicios(cot.servicios || []);
+      recalcTotales();
+    }
+
+    function renderServicios(servicios) {
+      const tabla = document.getElementById("tabla-servicios");
+      tabla.innerHTML = "";
+      servicios.forEach((s, i) => {
+        const fila = document.createElement("div");
+        fila.className = "tabla-fila";
+        fila.innerHTML = `
+          <input class="tabla-input s-nombre" type="text" placeholder="Descripción" value="${s.nombre||""}" />
+          <input class="tabla-input s-cant" type="number" min="1" value="${s.cantidad||1}" />
+          <input class="tabla-input s-precio" type="number" min="0" step="0.01" value="${s.precio||0}" />
+          <span class="tabla-costo s-total">$${((s.cantidad||1)*(s.precio||0)).toLocaleString("es-MX",{minimumFractionDigits:2})}</span>
+          <button class="btn-del-fila"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`;
+        fila.querySelector(".btn-del-fila").addEventListener("click", () => { fila.remove(); recalcTotales(); });
+        fila.querySelector(".s-cant").addEventListener("input", () => actualizarFila(fila));
+        fila.querySelector(".s-precio").addEventListener("input", () => actualizarFila(fila));
+        tabla.appendChild(fila);
+      });
+    }
+
+    function actualizarFila(fila) {
+      const cant  = parseFloat(fila.querySelector(".s-cant").value) || 0;
+      const precio = parseFloat(fila.querySelector(".s-precio").value) || 0;
+      fila.querySelector(".s-total").textContent = "$" + (cant * precio).toLocaleString("es-MX", { minimumFractionDigits: 2 });
+      recalcTotales();
+    }
+
+    function recalcTotales() {
+      let subtotal = 0;
+      document.querySelectorAll(".tabla-fila").forEach(f => {
+        subtotal += (parseFloat(f.querySelector(".s-cant").value)||0) * (parseFloat(f.querySelector(".s-precio").value)||0);
+      });
+      const pct = parseFloat(document.getElementById("anticipo-pct").value) || 50;
+      const anticipo  = subtotal * pct / 100;
+      const restante  = subtotal - anticipo;
+      document.getElementById("t-subtotal").textContent = "$" + subtotal.toLocaleString("es-MX", { minimumFractionDigits: 2 });
+      document.getElementById("t-anticipo").textContent = "$" + anticipo.toLocaleString("es-MX", { minimumFractionDigits: 2 });
+      document.getElementById("t-restante").textContent = "$" + restante.toLocaleString("es-MX", { minimumFractionDigits: 2 });
+    }
+
+    document.getElementById("anticipo-pct").addEventListener("input", recalcTotales);
+
+    document.getElementById("btn-add-servicio").addEventListener("click", () => {
+      const tabla = document.getElementById("tabla-servicios");
+      const fila = document.createElement("div");
+      fila.className = "tabla-fila";
+      fila.innerHTML = `
+        <input class="tabla-input s-nombre" type="text" placeholder="Descripción" value="" />
+        <input class="tabla-input s-cant" type="number" min="1" value="1" />
+        <input class="tabla-input s-precio" type="number" min="0" step="0.01" value="0" />
+        <span class="tabla-costo s-total">$0.00</span>
+        <button class="btn-del-fila"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`;
+      fila.querySelector(".btn-del-fila").addEventListener("click", () => { fila.remove(); recalcTotales(); });
+      fila.querySelector(".s-cant").addEventListener("input", () => actualizarFila(fila));
+      fila.querySelector(".s-precio").addEventListener("input", () => actualizarFila(fila));
+      tabla.appendChild(fila);
+    });
+
+    function getServicios() {
+      const servicios = [];
+      document.querySelectorAll(".tabla-fila").forEach(f => {
+        servicios.push({
+          nombre:   f.querySelector(".s-nombre").value.trim(),
+          cantidad: parseFloat(f.querySelector(".s-cant").value) || 1,
+          precio:   parseFloat(f.querySelector(".s-precio").value) || 0
+        });
+      });
+      return servicios;
+    }
+
+    // Guardar
+    document.getElementById("btn-guardar").addEventListener("click", async () => {
+      if (!cotActual) return;
+      const servicios = getServicios();
+      const subtotal  = servicios.reduce((s, r) => s + r.cantidad * r.precio, 0);
+      await updateDoc(doc(db, "cotizaciones", cotActual), {
+        orden:       document.getElementById("f-orden").value.trim(),
+        fechaCot:    document.getElementById("f-fecha-cot").value,
+        cliente:     document.getElementById("f-cliente").value.trim(),
+        telefono:    document.getElementById("f-tel").value.trim(),
+        fechaEv:     document.getElementById("f-fecha-ev").value,
+        hora:        document.getElementById("f-hora").value,
+        venue:       document.getElementById("f-venue").value.trim(),
+        descripcion: document.getElementById("f-desc").value.trim(),
+        servicios, subtotal,
+        anticipo:    parseFloat(document.getElementById("anticipo-pct").value) || 50
+      });
+      toast("Cotización guardada");
+    });
+
+    // Generar PDF
+    document.getElementById("btn-pdf").addEventListener("click", () => {
+      if (!cotActual) return;
+      const cot = cotizaciones.find(c => c.id === cotActual);
+      if (!cot) return;
+      const servicios = getServicios();
+      const subtotal  = servicios.reduce((s, r) => s + r.cantidad * r.precio, 0);
+      const pct       = parseFloat(document.getElementById("anticipo-pct").value) || 50;
+      const anticipo  = subtotal * pct / 100;
+      const restante  = subtotal - anticipo;
+      const fmt = n => "$" + n.toLocaleString("es-MX", { minimumFractionDigits: 2 });
+      const fechaEvFmt = cot.fechaEv ? new Date(cot.fechaEv + "T12:00:00").toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" }) : "—";
+      const fechaCotFmt = cot.fechaCot ? new Date(cot.fechaCot + "T12:00:00").toLocaleDateString("es-MX") : "—";
+
+      const filasServicios = servicios.map(s => `
+        <tr>
+          <td style="padding:10px 8px;border-bottom:1px solid #EFE6DD;font-size:12px">${s.nombre||""}</td>
+          <td style="padding:10px 8px;border-bottom:1px solid #EFE6DD;text-align:center;font-size:12px">${s.cantidad}</td>
+          <td style="padding:10px 8px;border-bottom:1px solid #EFE6DD;text-align:right;font-size:12px">${fmt(s.precio)}</td>
+          <td style="padding:10px 8px;border-bottom:1px solid #EFE6DD;text-align:right;font-size:12px;font-weight:500">${fmt(s.cantidad*s.precio)}</td>
+        </tr>`).join("");
+
+      // Filas vacías para completar la tabla
+      const filasVacias = Array(Math.max(0, 6 - servicios.length)).fill(`
+        <tr>
+          <td style="padding:10px 8px;border-bottom:1px solid #EFE6DD;height:36px"></td>
+          <td style="padding:10px 8px;border-bottom:1px solid #EFE6DD"></td>
+          <td style="padding:10px 8px;border-bottom:1px solid #EFE6DD"></td>
+          <td style="padding:10px 8px;border-bottom:1px solid #EFE6DD"></td>
+        </tr>`).join("");
+
+      const html = `
+        <html><head><meta charset="UTF-8"/>
+        <style>
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: 'Georgia', serif; background: #fff; color: #55524F; }
+          .page { width: 210mm; min-height: 297mm; padding: 12mm 14mm; margin: 0 auto; }
+        </style></head>
+        <body><div class="page">
+
+          <!-- Header -->
+          <table width="100%" style="margin-bottom:16px">
+            <tr>
+              <td width="120">
+                <img src="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" width="90" style="display:block" />
+              </td>
+              <td style="text-align:center;font-size:11px;color:#C2AFA0;line-height:1.6">
+                @lets_party.cdmx &nbsp;|&nbsp; Let's Party<br/>
+                Tejupilco 14 Lomas de Atizapán, Edo. de Méx.<br/>
+                Tel 5510045466
+              </td>
+              <td width="140" style="text-align:right">
+                <div style="font-size:11px;color:#888;margin-bottom:4px">Fecha: <strong style="color:#55524F">${fechaCotFmt}</strong></div>
+                <div style="font-size:18px;font-weight:bold;color:#55524F">Order # ${cot.orden || "—"}</div>
+              </td>
+            </tr>
+          </table>
+
+          <hr style="border:none;border-top:1px solid #EFE6DD;margin-bottom:14px"/>
+
+          <!-- Datos cliente -->
+          <table width="100%" style="margin-bottom:10px">
+            <tr>
+              <td width="50%" style="padding-bottom:10px">
+                <span style="font-size:11px;color:#C2AFA0;text-transform:uppercase;letter-spacing:1px">Nombre:</span>
+                <span style="font-size:15px;font-weight:bold;margin-left:8px">${cot.cliente || "—"}</span>
+              </td>
+              <td width="50%" style="text-align:right">
+                <span style="font-size:11px;color:#C2AFA0;text-transform:uppercase;letter-spacing:1px">Teléfono:</span>
+                <span style="font-size:15px;font-weight:bold;margin-left:8px">${cot.telefono || "—"}</span>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" style="padding-bottom:10px">
+                <span style="font-size:11px;color:#C2AFA0;text-transform:uppercase;letter-spacing:1px">Venue:</span>
+                <span style="font-size:14px;margin-left:8px">${cot.venue || "—"}</span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span style="font-size:11px;color:#C2AFA0;text-transform:uppercase;letter-spacing:1px">Hora:</span>
+                <span style="font-size:14px;margin-left:8px">${cot.hora || "—"}</span>
+              </td>
+              <td style="text-align:right">
+                <span style="font-size:11px;color:#C2AFA0;text-transform:uppercase;letter-spacing:1px">Fecha:</span>
+                <span style="font-size:14px;font-weight:bold;margin-left:8px">${fechaEvFmt}</span>
+              </td>
+            </tr>
+          </table>
+
+          <hr style="border:none;border-top:1px solid #EFE6DD;margin-bottom:14px"/>
+
+          <!-- Tabla servicios -->
+          <table width="100%" style="border-collapse:collapse;margin-bottom:16px">
+            <thead>
+              <tr style="background:#F5F1EA">
+                <th style="padding:10px 8px;text-align:left;font-size:12px;color:#C2AFA0;font-weight:500;letter-spacing:1px">Servicio</th>
+                <th style="padding:10px 8px;text-align:center;font-size:12px;color:#C2AFA0;font-weight:500;letter-spacing:1px;width:60px">Cant</th>
+                <th style="padding:10px 8px;text-align:right;font-size:12px;color:#C2AFA0;font-weight:500;letter-spacing:1px;width:100px">Precio</th>
+                <th style="padding:10px 8px;text-align:right;font-size:12px;color:#C2AFA0;font-weight:500;letter-spacing:1px;width:100px">Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filasServicios}
+              ${filasVacias}
+            </tbody>
+          </table>
+
+          <!-- Totales y Términos -->
+          <table width="100%" style="margin-bottom:16px">
+            <tr valign="top">
+              <td width="58%" style="padding-right:16px">
+                <div style="background:#F9F6F0;border-radius:8px;padding:14px;font-size:10px;color:#55524F;line-height:1.55">
+                  <div style="font-size:13px;font-weight:bold;text-align:center;margin-bottom:8px;color:#C2AFA0">Términos y Condiciones</div>
+                  ${TERMINOS.split("\n").map(l => `<p style="margin-bottom:4px">*${l.trim()}</p>`).join("")}
+                </div>
+              </td>
+              <td width="42%" style="text-align:right;padding-left:16px">
+                <table width="100%">
+                  <tr><td style="padding:8px 0;border-bottom:1px solid #EFE6DD">
+                    <span style="font-size:12px;color:#C2AFA0;text-transform:uppercase;letter-spacing:1px">Subtotal:</span>
+                    <span style="font-size:18px;font-weight:bold;margin-left:12px">${fmt(subtotal)}</span>
+                  </td></tr>
+                  <tr><td style="padding:8px 0;border-bottom:1px solid #EFE6DD">
+                    <span style="font-size:12px;color:#C2AFA0;text-transform:uppercase;letter-spacing:1px">Anticipo:</span>
+                    <span style="font-size:18px;font-weight:bold;margin-left:12px">${fmt(anticipo)}</span>
+                  </td></tr>
+                  <tr><td style="padding:8px 0">
+                    <span style="font-size:12px;color:#C2AFA0;text-transform:uppercase;letter-spacing:1px">Restante:</span>
+                    <span style="font-size:22px;font-weight:bold;margin-left:12px">${fmt(restante)}</span>
+                  </td></tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+        </div></body></html>`;
+
+      const ventana = window.open("", "_blank");
+      ventana.document.write(html);
+      ventana.document.close();
+      ventana.onload = () => { ventana.print(); };
+    });
+
+    // Convertir a evento
+    document.getElementById("btn-convertir").addEventListener("click", async () => {
+      if (!cotActual) return;
+      const cot = cotizaciones.find(c => c.id === cotActual);
+      if (!cot) return;
+      if (!confirm(`¿Convertir la cotización de ${cot.cliente || "este cliente"} en un evento?`)) return;
+      const servicios = getServicios();
+      await addDoc(collection(db, "eventos"), {
+        orden:      cot.orden || "",
+        cliente:    cot.cliente || "",
+        telefono:   cot.telefono || "",
+        fecha:      cot.fechaEv || "",
+        hora:       cot.hora || "",
+        venue:      cot.venue || "",
+        direccion:  "",
+        materiales: servicios.map(s => ({ nombre: s.nombre, costo: s.cantidad * s.precio, listo: false })),
+        creadoEn:   Timestamp.now()
+      });
+      toast("¡Evento creado desde la cotización!");
+    });
+
+    // Eliminar
+    document.getElementById("btn-eliminar").addEventListener("click", async () => {
+      if (!cotActual) return;
+      if (!confirm("¿Eliminar esta cotización?")) return;
+      await deleteDoc(doc(db, "cotizaciones", cotActual));
+      cotActual = null;
+      document.getElementById("sin-cot").style.display = "flex";
+      document.getElementById("cot-editor").style.display = "none";
+      toast("Cotización eliminada");
+    });
+
+    function toast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg; t.classList.add("visible");
+      setTimeout(() => t.classList.remove("visible"), 2500);
+    }
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator)
+      window.addEventListener('load', () => navigator.serviceWorker.register('/letsparty-app/sw.js'));
+  </script>
+</body>
+</html>

@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>Calendario · Let's Party</title>
   <link rel="icon" href="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" />
+  <script src="nav.js" defer></script>
   <style>
     :root {
       --fondo:     #FBF8F1;
@@ -192,12 +193,7 @@
     <div class="sidebar-logo">
       <img src="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" alt="Let's Party" />
     </div>
-    <ul class="sidebar-nav">
-      <li><a href="dashboard.html">Dashboard</a></li>
-      <li><a href="eventos.html">Eventos</a></li>
-      <li><a href="calendario.html" class="activo">Calendario</a></li>
-      <li><a href="fotos.html">Fotos</a></li>
-    </ul>
+    <ul class="sidebar-nav"></ul>
     <div class="sidebar-footer">
       <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
     </div>
@@ -264,12 +260,6 @@
 
     onAuthStateChanged(auth, u => { if (!u) window.location.href = "index.html"; });
     document.getElementById("btn-logout").onclick = () => signOut(auth);
-
-    // Sidebar Mobile
-    const sidebar = document.getElementById("sidebar");
-    const sidebarOvl = document.getElementById("sidebar-overlay");
-    document.getElementById("btn-hamburguesa").onclick = () => { sidebar.classList.add("abierto"); sidebarOvl.classList.add("visible"); };
-    sidebarOvl.onclick = () => { sidebar.classList.remove("abierto"); sidebarOvl.classList.remove("visible"); };
 
     // --- CALENDARIO LOGIC ---
     let eventos = [];

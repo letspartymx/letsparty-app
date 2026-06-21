@@ -8,6 +8,7 @@
   <title>Dashboard · Let's Party</title>
   <link rel="icon" href="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" />
   <link rel="stylesheet" href="styles.css" />
+  <script src="nav.js" defer></script>
   <style>
     :root {
       --fondo:     #FBF8F1;
@@ -253,32 +254,7 @@
     <div class="sidebar-logo">
       <img src="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" alt="Let's Party" />
     </div>
-    <ul class="sidebar-nav">
-      <li>
-        <a href="dashboard.html" class="activo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-          Dashboard
-        </a>
-      </li>
-      <li>
-        <a href="eventos.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          Eventos
-        </a>
-      </li>
-      <li>
-        <a href="calendario.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="8" cy="16" r="1" fill="currentColor"/><circle cx="12" cy="16" r="1" fill="currentColor"/><circle cx="16" cy="16" r="1" fill="currentColor"/></svg>
-          Calendario
-        </a>
-      </li>
-      <li>
-        <a href="fotos.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          Fotos
-        </a>
-      </li>
-    </ul>
+    <ul class="sidebar-nav"></ul>
     <div class="sidebar-footer">
       <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
     </div>
@@ -368,17 +344,6 @@
       window.location.href = "index.html";
     });
 
-    // Hamburguesa
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("sidebar-overlay");
-    document.getElementById("btn-hamburguesa").addEventListener("click", () => {
-      sidebar.classList.add("abierto");
-      overlay.classList.add("visible");
-    });
-    overlay.addEventListener("click", () => {
-      sidebar.classList.remove("abierto");
-      overlay.classList.remove("visible");
-    });
 
     // Fecha hoy
     const hoy = new Date();
