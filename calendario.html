@@ -284,14 +284,15 @@
       body { display: block; }
       .sidebar { transform: translateX(-100%); }
       .sidebar.abierto { transform: translateX(0); }
-      .main { margin-left: 0; padding: 16px 14px; }
+      .main { margin-left: 0 !important; padding: 16px 14px; }
       .topbar-mobile { display: flex; }
-      .cal-grid-wrap { display: none; }
-      .vista-lista { display: block; }
+      .cal-grid-wrap { display: none !important; }
+      .vista-lista { display: block !important; }
       .toggle-vista { display: none; }
       .cal-titulo { font-size: 24px; }
       .mes-label { font-size: 16px; min-width: 140px; }
       .panel-dia { width: 100%; }
+      .cal-header { flex-wrap: wrap; gap: 8px; }
     }
   </style>
 </head>
@@ -636,8 +637,13 @@
       });
     }
 
-    // Render inicial
+    // Render inicial — forzar vista lista en mobile
     render();
+    if (window.innerWidth <= 680) {
+      document.querySelector(".cal-grid-wrap").style.display = "none";
+      document.getElementById("vista-lista").style.display = "block";
+      renderLista();
+    }
   </script>
 
   <script>
