@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#55524F" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Dashboard · Let's Party</title>
+  <link rel="icon" href="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root {
+      --fondo:     #FBF8F1;
+      --principal: #55524F;
+      --detalle:   #EFE6DD;
+      --acento:    #C2AFA0;
+      --blanco:    #ffffff;
+      --serif:     'Cormorant Garamond', Georgia, serif;
+      --sans:      'DM Sans', system-ui, sans-serif;
+      --sidebar:   220px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--fondo);
+      color: var(--principal);
+      font-family: var(--sans);
+      font-weight: 300;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar);
+      min-height: 100vh;
+      background: var(--principal);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+      transition: transform 0.3s;
+    }
+    .sidebar-logo {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      justify-content: center;
+    }
+    .sidebar-logo img {
+      height: 120px;
+      width: auto;
+    }
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 0;
+      list-style: none;
+    }
+    .sidebar-nav li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 400;
+      color: rgba(251,248,241,0.6);
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      transition: color 0.2s, background 0.2s;
+    }
+    .sidebar-nav li a:hover { color: var(--fondo); background: rgba(255,255,255,0.06); }
+    .sidebar-nav li a.activo { color: var(--fondo); background: rgba(255,255,255,0.12); }
+    .sidebar-nav li a svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .btn-logout {
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(251,248,241,0.6);
+      font-family: var(--sans);
+      font-size: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,0.08); color: var(--fondo); }
+
+    /* ── Overlay sidebar mobile ── */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(85,82,79,0.45);
+      z-index: 99;
+    }
+    .sidebar-overlay.visible { display: block; }
+
+    /* ── Main ── */
+    .main {
+      margin-left: var(--sidebar);
+      flex: 1;
+      padding: 32px;
+    }
+
+    /* ── Topbar mobile ── */
+    .topbar-mobile {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      position: relative;
+      padding-top: 8px;
+      min-height: 96px;
+    }
+    .topbar-mobile img {
+      height: 80px;
+      width: auto;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .btn-hamburguesa {
+      background: var(--principal);
+      border: none;
+      border-radius: 10px;
+      padding: 9px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-hamburguesa svg { width: 20px; height: 20px; }
+
+    /* ── Bienvenida ── */
+    .bienvenida { margin-bottom: 36px; }
+    .bienvenida p { font-size: 14px; font-weight: 400; color: var(--principal); }
+
+    /* ── Resumen ── */
+    .resumen-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .resumen-card {
+      background: var(--blanco);
+      border: 1px solid var(--detalle);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .resumen-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--acento);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .resumen-label svg { width: 14px; height: 14px; }
+    .resumen-numero {
+      font-family: var(--serif);
+      font-size: 48px;
+      font-weight: 300;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .resumen-sub { font-size: 12px; opacity: 0.5; }
+
+    /* ── Próximos eventos ── */
+    .seccion-titulo {
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 300;
+      margin-bottom: 16px;
+    }
+    .seccion-titulo em { font-style: italic; color: var(--acento); }
+
+    .proximos-lista { display: flex; flex-direction: column; gap: 10px; }
+
+    .proximo-card {
+      background: var(--blanco);
+      border: 1px solid var(--detalle);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: 56px 1fr auto;
+      gap: 16px;
+      align-items: center;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .proximo-card:hover { box-shadow: 0 4px 20px rgba(85,82,79,0.10); transform: translateY(-1px); }
+
+    .proximo-fecha {
+      background: var(--fondo);
+      border-radius: 8px;
+      padding: 8px 4px;
+      text-align: center;
+    }
+    .proximo-dia { font-family: var(--serif); font-size: 24px; font-weight: 300; line-height: 1; }
+    .proximo-mes { font-size: 9px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--acento); }
+
+    .proximo-info h3 { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+    .proximo-info span { font-size: 12px; opacity: 0.5; }
+
+    .proximo-orden {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--acento);
+      background: var(--detalle);
+      padding: 5px 12px;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      background: var(--blanco);
+      border: 1px solid var(--detalle);
+      border-radius: 14px;
+    }
+    .empty-state p { font-family: var(--serif); font-size: 20px; font-style: italic; color: var(--acento); margin-bottom: 6px; }
+    .empty-state span { font-size: 13px; opacity: 0.5; }
+
+    /* ── Mobile ── */
+    @media (max-width: 680px) {
+      body { display: block; }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.abierto { transform: translateX(0); }
+      .main { margin-left: 0; padding: 20px 16px; }
+      .topbar-mobile { display: flex; }
+      .resumen-grid { grid-template-columns: 1fr 1fr; }
+      .proximo-card { grid-template-columns: 48px 1fr; }
+      .proximo-orden { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" alt="Let's Party" />
+    </div>
+    <ul class="sidebar-nav">
+      <li>
+        <a href="dashboard.html" class="activo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+      </li>
+      <li>
+        <a href="eventos.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Eventos
+        </a>
+      </li>
+      <li>
+        <a href="calendario.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="8" cy="16" r="1" fill="currentColor"/><circle cx="12" cy="16" r="1" fill="currentColor"/><circle cx="16" cy="16" r="1" fill="currentColor"/></svg>
+          Calendario
+        </a>
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Topbar mobile -->
+    <div class="topbar-mobile">
+      <button class="btn-hamburguesa" id="btn-hamburguesa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#FBF8F1" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <img src="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" alt="Let's Party" />
+    </div>
+
+    <div class="bienvenida">
+      <p id="fecha-hoy"></p>
+    </div>
+
+    <div class="resumen-grid">
+      <div class="resumen-card">
+        <div class="resumen-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Total eventos
+        </div>
+        <div class="resumen-numero" id="total-eventos">—</div>
+        <div class="resumen-sub">eventos registrados</div>
+      </div>
+      <div class="resumen-card">
+        <div class="resumen-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+          Este mes
+        </div>
+        <div class="resumen-numero" id="eventos-mes">—</div>
+        <div class="resumen-sub">eventos este mes</div>
+      </div>
+      <div class="resumen-card">
+        <div class="resumen-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          Total gastos
+        </div>
+        <div class="resumen-numero" id="total-gastos">—</div>
+        <div class="resumen-sub">en todos los eventos</div>
+      </div>
+    </div>
+
+    <h2 class="seccion-titulo">Próximos <em>eventos</em></h2>
+    <div class="proximos-lista" id="proximos-lista">
+      <div class="empty-state">
+        <p>Sin eventos próximos</p>
+        <span>Agrega eventos desde el módulo de eventos</span>
+      </div>
+    </div>
+
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, enableIndexedDbPersistence, collection, onSnapshot, query, orderBy }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB6nm7Ttl2Iuevbp6gp-GsBk4-06I6Z5Bc",
+      authDomain: "letsparty-db.firebaseapp.com",
+      projectId: "letsparty-db",
+      storageBucket: "letsparty-db.firebasestorage.app",
+      messagingSenderId: "274690779810",
+      appId: "1:274690779810:web:ce6f54b3ce8b39248505fb"
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+    enableIndexedDbPersistence(db).catch(() => {});
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) window.location.href = "index.html";
+    });
+
+    document.getElementById("btn-logout").addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "index.html";
+    });
+
+    // Hamburguesa
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebar-overlay");
+    document.getElementById("btn-hamburguesa").addEventListener("click", () => {
+      sidebar.classList.add("abierto");
+      overlay.classList.add("visible");
+    });
+    overlay.addEventListener("click", () => {
+      sidebar.classList.remove("abierto");
+      overlay.classList.remove("visible");
+    });
+
+    // Fecha hoy
+    const hoy = new Date();
+    document.getElementById("fecha-hoy").textContent =
+      hoy.toLocaleDateString("es-MX", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
+    // Datos desde Firestore
+    const q = query(collection(db, "eventos"), orderBy("fecha", "asc"));
+    onSnapshot(q, (snapshot) => {
+      const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      const ahora = hoy.toISOString().split("T")[0];
+      const mesActual = ahora.substring(0, 7);
+
+      document.getElementById("total-eventos").textContent = docs.length;
+      document.getElementById("eventos-mes").textContent =
+        docs.filter(e => e.fecha && e.fecha.startsWith(mesActual)).length;
+
+      const totalGastos = docs.reduce((sum, e) =>
+        sum + (e.gastos || []).reduce((s, g) => s + (g.monto || 0), 0), 0);
+      document.getElementById("total-gastos").textContent =
+        totalGastos > 0 ? "$" + totalGastos.toLocaleString("es-MX") : "—";
+
+      const proximos = docs.filter(e => e.fecha >= ahora).slice(0, 5);
+      const lista = document.getElementById("proximos-lista");
+      const meses = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+
+      if (proximos.length === 0) {
+        lista.innerHTML = `<div class="empty-state"><p>Sin eventos próximos</p><span>Agrega eventos desde el módulo de eventos</span></div>`;
+        return;
+      }
+
+      lista.innerHTML = proximos.map(e => {
+        const [año, mes, dia] = e.fecha.split("-");
+        return `
+          <a href="eventos.html" class="proximo-card">
+            <div class="proximo-fecha">
+              <div class="proximo-dia">${dia}</div>
+              <div class="proximo-mes">${meses[parseInt(mes)-1]} ${año}</div>
+            </div>
+            <div class="proximo-info">
+              <h3>${e.cliente}</h3>
+              <span>${e.venue || "—"} · ${e.hora || "—"}</span>
+            </div>
+            <span class="proximo-orden">${e.orden}</span>
+          </a>`;
+      }).join("");
+    });
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/letsparty-app/sw.js');
+      });
+    }
+  </script>
+</body>
+</html>
