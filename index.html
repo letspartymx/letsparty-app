@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#55524F" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Let's Party · Admin</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    :root {
+      --fondo:     #FBF8F1;
+      --principal: #55524F;
+      --detalle:   #EFE6DD;
+      --acento:    #C2AFA0;
+      --error:     #b94a3a;
+      --serif:     'Cormorant Garamond', Georgia, serif;
+      --sans:      'DM Sans', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #C2AFA2;
+      color: var(--principal);
+      font-family: var(--sans);
+      font-weight: 300;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      position: relative;
+      z-index: 1;
+      background: var(--fondo);
+      border: 1px solid var(--detalle);
+      border-radius: 20px;
+      padding: 48px 40px 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 40px rgba(85,82,79,0.08);
+    }
+
+    .login-logo {
+      display: block;
+      height: 200px;
+      width: auto;
+      margin: 0 auto 32px;
+    }
+
+    .campo {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+    .campo label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--principal);
+      text-align: center;
+    }
+    .campo input {
+      background: #ffffff;
+      border: 1.5px solid var(--detalle);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--principal);
+      outline: none;
+      transition: border-color 0.2s;
+      text-align: center;
+    }
+    .campo input:focus { border-color: var(--acento); }
+    .campo input::placeholder { color: transparent; }
+
+    .error-msg {
+      display: none;
+      font-size: 12px;
+      color: var(--error);
+      text-align: center;
+      margin-bottom: 14px;
+      padding: 10px 14px;
+      background: #fdf2f0;
+      border-radius: 8px;
+      border: 1px solid #f5c6c0;
+    }
+    .error-msg.visible { display: block; }
+
+    .btn-login {
+      width: 100%;
+      background: var(--principal);
+      color: var(--fondo);
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      padding: 14px;
+      border: none;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 4px;
+    }
+    .btn-login:hover:not(:disabled) { background: var(--acento); transform: translateY(-1px); }
+    .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(251,248,241,0.3);
+      border-top-color: var(--fondo);
+      border-radius: 50%;
+      animation: girar 0.7s linear infinite;
+      margin: 0 auto;
+    }
+    .btn-login.cargando .texto { display: none; }
+    .btn-login.cargando .spinner { display: block; }
+    @keyframes girar { to { transform: rotate(360deg); } }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 11px;
+      color: var(--acento);
+      opacity: 0.7;
+      letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 16px;
+        align-items: center;
+      }
+      .login-card {
+        padding: 32px 20px 28px;
+        border-radius: 16px;
+        max-width: 100%;
+      }
+      .login-logo {
+        height: 140px;
+      }
+      .campo input {
+        font-size: 16px; /* evita zoom en iOS */
+        padding: 14px 16px;
+      }
+      .btn-login {
+        padding: 16px;
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <img class="login-logo"
+         src="https://res.cloudinary.com/db8kubeqq/image/upload/v1782009129/letsparty-logo_nt6adc.png"
+         alt="Let's Party" />
+
+    <div class="campo">
+      <label for="email">Correo</label>
+      <input type="email" id="email" placeholder="tu@correo.com" autocomplete="email" />
+    </div>
+
+    <div class="campo">
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+
+    <div class="error-msg" id="error-msg"></div>
+
+    <button class="btn-login" id="btn-login">
+      <span class="texto">Entrar</span>
+      <span class="spinner"></span>
+    </button>
+
+    <p class="login-footer">Let's Party · Solo acceso autorizado</p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB6nm7Ttl2Iuevbp6gp-GsBk4-06I6Z5Bc",
+      authDomain: "letsparty-db.firebaseapp.com",
+      projectId: "letsparty-db",
+      storageBucket: "letsparty-db.firebasestorage.app",
+      messagingSenderId: "274690779810",
+      appId: "1:274690779810:web:ce6f54b3ce8b39248505fb"
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) window.location.href = "dashboard.html";
+    });
+
+    const btnLogin = document.getElementById("btn-login");
+    const errorMsg = document.getElementById("error-msg");
+
+    function mostrarError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.add("visible");
+    }
+    function limpiarError() {
+      errorMsg.classList.remove("visible");
+    }
+
+    btnLogin.addEventListener("click", async () => {
+      limpiarError();
+      const email    = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!email || !password) {
+        mostrarError("Ingresa tu correo y contraseña.");
+        return;
+      }
+
+      btnLogin.classList.add("cargando");
+      btnLogin.disabled = true;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        const mensajes = {
+          "auth/invalid-credential": "Correo o contraseña incorrectos.",
+          "auth/user-not-found":     "No existe una cuenta con ese correo.",
+          "auth/wrong-password":     "Contraseña incorrecta.",
+          "auth/too-many-requests":  "Demasiados intentos. Espera un momento.",
+          "auth/invalid-email":      "El correo no tiene un formato válido.",
+        };
+        mostrarError(mensajes[err.code] || "Error al iniciar sesión. Intenta de nuevo.");
+      } finally {
+        btnLogin.classList.remove("cargando");
+        btnLogin.disabled = false;
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btnLogin.click();
+    });
+  </script>
+
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js');
+      });
+    }
+  </script>
+</body>
+</html>
